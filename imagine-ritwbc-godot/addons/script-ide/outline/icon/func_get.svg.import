@@ -2,16 +2,17 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dclmij440hqbb"
-path="res://.godot/imported/AntzBanner.png-631ff3ce9af212c627d22ca9f309d59c.ctex"
+uid="uid://c2a3aowyhxj5x"
+path="res://.godot/imported/func_get.svg-033d200e05dd58beec3becc7967b8c7d.ctex"
 metadata={
+"has_editor_variant": true,
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://demo/assets/AntzBanner.png"
-dest_files=["res://.godot/imported/AntzBanner.png-631ff3ce9af212c627d22ca9f309d59c.ctex"]
+source_file="res://addons/script-ide/outline/icon/func_get.svg"
+dest_files=["res://.godot/imported/func_get.svg-033d200e05dd58beec3becc7967b8c7d.ctex"]
 
 [params]
 
@@ -38,3 +39,6 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
+svg/scale=1.0
+editor/scale_with_editor_scale=true
+editor/convert_colors_with_editor_theme=false
