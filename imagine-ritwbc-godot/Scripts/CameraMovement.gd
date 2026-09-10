@@ -29,6 +29,13 @@ func _ready() -> void:
 	G_InputWrapper.on_release("mouse_pressed", set_mouse_up)
 	G_InputWrapper.on_press("zoom_in", zoom_in)
 	G_InputWrapper.on_press("zoom_out", zoom_out)
+	G_InputWrapper.on_press("escape", close_application)
+	
+	ImGui.imgui_layout.connect(_on_layout)
+func close_application(_name):
+	get_tree().quit(0);
+	
+#region Mouse Clamping
 
 func update_map_bounds() -> void:
 	if not map:
@@ -76,6 +83,10 @@ func get_distance_along_view( target_pos: Vector3) -> float:
 	var to_target = target_pos - self.global_transform.origin
 	return to_target.dot(cam_basis_z)
 
+#endregion
+
+#region Mouse Input
+
 func set_mouse_down(_name) -> void:
 	mouseDown = true
 	lastFramePos = get_viewport().get_mouse_position()
@@ -101,6 +112,8 @@ func zoom_towards_mouse(amount: float) -> void:
 
 	target_position = target_position.clamp(min_pos, max_pos)
 
+#endregion
+
 func _process(delta: float) -> void:
 	if mouseDown:
 		var current_mouse_pos := get_viewport().get_mouse_position()
@@ -111,7 +124,26 @@ func _process(delta: float) -> void:
 		target_position += pan_offset
 		target_position = target_position.clamp(min_pos, max_pos)
 	
-	print(target_position)
 	global_position = global_position.lerp(target_position, delta * smoothing_speed).clamp(min_pos, max_pos)
 	update_map_bounds();
+	
+func _on_layout():
+	ImGui.begin("Camera Data")
+	if(ImGui.collapsing_header("Camera Position")):
+		ImGui.indent(20)
+		ImGui.text("Camera Local Position: "+str(position))
+		ImGui.text("Camera Global Position: "+str(global_position))
+		ImGui.text("Camera Position Relative to Map: " + str(map.global_position-global_position))
+		ImGui.unindent(20)
+		
+	if ImGui.collapsing_header("Camera Controls"):
+		ImGui.indent(20)
+		pan_sensitivity = ImGui.slider_float("Pan sensitivity", pan_sensitivity, .1, 1.0);
+		zoom_sensitivity = ImGui.slider_float("Zoom sensitivity", zoom_sensitivity, .1, 1.0);
+		smoothing_speed = ImGui.slider_float("Smoothing Speed", smoothing_speed, 1, 30);
+		ImGui.unindent(20)
+
+	
+	ImGui.end()
+	pass;
 	
