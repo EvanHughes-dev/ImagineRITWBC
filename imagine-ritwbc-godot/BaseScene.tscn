@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://43t287uxtydb"]
+
+[ext_resource type="PackedScene" uid="uid://cggqb75a8w8r" path="res://addons/debug_menu/debug_menu.tscn" id="1_m2yd1"]
+
+[node name="Node3D" type="Node3D" unique_id=1321706077]
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=461650827]
+
+[node name="CanvasLayer" parent="Camera3D" unique_id=414397422 instance=ExtResource("1_m2yd1")]
