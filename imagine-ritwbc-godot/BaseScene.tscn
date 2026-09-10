@@ -6,9 +6,10 @@
 
 [node name="Node3D" type="Node3D" unique_id=1321706077]
 
-[node name="Camera3D" type="Camera3D" parent="." unique_id=461650827]
+[node name="Camera3D" type="Camera3D" parent="." unique_id=461650827 node_paths=PackedStringArray("map")]
 transform = Transform3D(-1, 8.742278e-08, 3.821371e-15, 0, -4.371139e-08, 1, 8.742278e-08, 1, 4.371139e-08, 0, 5.6411886, 0)
 script = ExtResource("1_4a80b")
+map = NodePath("../Sprite3D")
 
 [node name="CanvasLayer" parent="Camera3D" unique_id=414397422 instance=ExtResource("1_m2yd1")]
 
