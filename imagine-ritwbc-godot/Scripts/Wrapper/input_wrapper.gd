@@ -18,7 +18,6 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
 	_inputInstance = Engine.get_singleton("InputManager")
-	print("InputManager singleton: ", _inputInstance)  # sanity check
 	
 
 func validate_inputInstance()->void:

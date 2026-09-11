@@ -9,8 +9,8 @@ extends Camera3D
 
 @export_category("Map & Bounds")
 @export var map: Sprite3D
-@export var min_height: float = 2.0
-@export var max_height: float = 20.0
+@export var min_height: float = 2
+@export var max_height: float = 20
 
 const BASE_ZOOM_VALUE: float = 2.0
 const BASE_PAN_VALUE: float = 0.05
@@ -23,20 +23,34 @@ var mouseDown: bool = false
 
 func _ready() -> void:
 	target_position = global_position
-	update_map_bounds()
 	
+	update_map_bounds()
+	set_zoom_max()
+	
+	initialize_input()
+	
+	ImGui.imgui_layout.connect(_on_layout)
+
+func initialize_input():
 	G_InputWrapper.on_press("mouse_pressed", set_mouse_down)
 	G_InputWrapper.on_release("mouse_pressed", set_mouse_up)
 	G_InputWrapper.on_press("zoom_in", zoom_in)
 	G_InputWrapper.on_press("zoom_out", zoom_out)
 	G_InputWrapper.on_press("escape", close_application)
 	
-	ImGui.imgui_layout.connect(_on_layout)
+func set_zoom_max():
+	var world_aabb_map: AABB = map.global_transform * map.get_aabb()
+	var fov_rad = deg_to_rad(self.fov)
+	var distance = world_aabb_map.size.z / (2.0*tan(fov_rad / 2.0))
+	max_height = distance
+	
+
 func close_application(_name):
 	get_tree().quit(0);
 	
 #region Mouse Clamping
 
+## Update the min and max position based on distance from mao
 func update_map_bounds() -> void:
 	if not map:
 		return
@@ -71,6 +85,7 @@ func update_map_bounds() -> void:
 		min_pos.z = cz
 		max_pos.z = cz
 
+## Determine how much of the map the camera can see based on the current distance
 func get_visible_size_at_distance(distance: float) -> Vector2:
 	var fov_rad = deg_to_rad(self.fov)
 	var height = 2.0 * distance * tan(fov_rad / 2.0)
@@ -78,6 +93,7 @@ func get_visible_size_at_distance(distance: float) -> Vector2:
 	var width = height * aspect
 	return Vector2(width, height)
 
+## Get the distance from the camera to the map
 func get_distance_along_view( target_pos: Vector3) -> float:
 	var cam_basis_z = -self.global_transform.basis.z # forward
 	var to_target = target_pos - self.global_transform.origin
@@ -100,10 +116,12 @@ func zoom_in(_name) -> void:
 func zoom_out(_name) -> void:
 	zoom_towards_mouse(BASE_ZOOM_VALUE * zoom_sensitivity)
 
+## Zoom the camera in and out based on the mouse position
 func zoom_towards_mouse(amount: float) -> void:
 	var mouse_pos: Vector2 = get_viewport().get_mouse_position()
 	var ray_dir: Vector3 = project_ray_normal(mouse_pos)
-
+	
+	# Ensure we have a non 0 value. Dividing by 0 breaks everything
 	if abs(ray_dir.y) > 0.001:
 		var zoom_step: Vector3 = ray_dir * (amount / ray_dir.y)
 		target_position += zoom_step
@@ -128,6 +146,8 @@ func _process(delta: float) -> void:
 	update_map_bounds();
 	
 func _on_layout():
+
+	ImGui.set_next_window_size(600, 200, ImGui.COND_FIRST_USE_EVER);
 	ImGui.begin("Camera Data")
 	if(ImGui.collapsing_header("Camera Position")):
 		ImGui.indent(20)
@@ -142,7 +162,6 @@ func _on_layout():
 		zoom_sensitivity = ImGui.slider_float("Zoom sensitivity", zoom_sensitivity, .1, 1.0);
 		smoothing_speed = ImGui.slider_float("Smoothing Speed", smoothing_speed, 1, 30);
 		ImGui.unindent(20)
-
 	
 	ImGui.end()
 	pass;
