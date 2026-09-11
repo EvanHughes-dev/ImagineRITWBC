@@ -9,25 +9,35 @@ extends Camera3D
 
 @export_category("Map & Bounds")
 @export var map: Sprite3D
+
+@onready var world_aabb_map: AABB = map.global_transform * map.get_aabb()
 @export var min_height: float = 2
 @export var max_height: float = 20
+@export var min_pos: Vector3
+@export var max_pos: Vector3
 
 const BASE_ZOOM_VALUE: float = 2.0
 const BASE_PAN_VALUE: float = 0.05
 
-var min_pos: Vector3
-var max_pos: Vector3
 var target_position: Vector3
+var target_zoom: float;
 var lastFramePos: Vector2 = Vector2.ZERO
 var mouseDown: bool = false
 
+## Get the current aspect ratio
+var aspect: float:
+	get():
+		var viewport_size: = get_viewport().get_visible_rect().size
+		return viewport_size.x / viewport_size.y;
+
 func _ready() -> void:
 	
-	var win = SeparateWindow.new()
-	add_child(win)
-	win.open_window("Sub Window", 100, 100)
+	# var win = SeparateWindow.new()
+	# add_child(win)
+	# win.open_window("Sub Window", 100, 100)
 	
 	target_position = global_position
+	target_position.y = size
 	
 	update_map_bounds()
 	set_zoom_max()
@@ -44,11 +54,29 @@ func initialize_input():
 	G_InputWrapper.on_press("escape", close_application)
 	
 func set_zoom_max():
-	var world_aabb_map: AABB = map.global_transform * map.get_aabb()
-	var fov_rad = deg_to_rad(self.fov)
-	var distance = world_aabb_map.size.z / (2.0*tan(fov_rad / 2.0))
-	max_height = distance
 	
+	var visible_size: Vector2 = get_visible_size()
+	
+	# world_aabb_map.size.z = visble_size.y * yMult
+	
+	# Determine % of how to zoom out before reaching bounds
+	var xMult: float = world_aabb_map.size.x / visible_size.x
+	var yMult: float = world_aabb_map.size.z / visible_size.y
+	
+	# Set heights based on mult value
+	# Smaller value is the lowest scale to increase
+	if xMult < yMult:
+		if keep_aspect == KEEP_HEIGHT:
+			max_height = size * xMult / aspect
+		else:
+			max_height = size * xMult
+	else:
+		if keep_aspect == KEEP_HEIGHT:
+			max_height = size * yMult
+		else:
+			max_height = size * yMult * aspect
+
+		
 
 func close_application(_name):
 	get_tree().quit(0);
@@ -60,10 +88,7 @@ func update_map_bounds() -> void:
 	if not map:
 		return
 
-	var world_aabb_map: AABB = map.global_transform * map.get_aabb()
-
-	var d = get_distance_along_view(map.global_position)
-	var visible_size = get_visible_size_at_distance(d)
+	var visible_size = get_visible_size()
 	var half_visible = visible_size * 0.5
 
 	# Shrink bounds inward by half the visible frustum size,
@@ -90,19 +115,16 @@ func update_map_bounds() -> void:
 		min_pos.z = cz
 		max_pos.z = cz
 
-## Determine how much of the map the camera can see based on the current distance
-func get_visible_size_at_distance(distance: float) -> Vector2:
-	var fov_rad = deg_to_rad(self.fov)
-	var height = 2.0 * distance * tan(fov_rad / 2.0)
-	var aspect = get_viewport().get_visible_rect().size.x / get_viewport().get_visible_rect().size.y
-	var width = height * aspect
-	return Vector2(width, height)
-
-## Get the distance from the camera to the map
-func get_distance_along_view( target_pos: Vector3) -> float:
-	var cam_basis_z = -self.global_transform.basis.z # forward
-	var to_target = target_pos - self.global_transform.origin
-	return to_target.dot(cam_basis_z)
+## Determine how much of the map the camera can see
+func get_visible_size() -> Vector2:
+	var camSize: Vector2;
+	if keep_aspect == KEEP_HEIGHT:
+		camSize = Vector2(size * aspect, size);
+		pass;
+	else:
+		camSize = Vector2(size, size/aspect)
+		pass;
+	return camSize
 
 #endregion
 
@@ -147,8 +169,14 @@ func _process(delta: float) -> void:
 		target_position += pan_offset
 		target_position = target_position.clamp(min_pos, max_pos)
 	
-	global_position = global_position.lerp(target_position, delta * smoothing_speed).clamp(min_pos, max_pos)
+	# Smoothly move between two current and target position
+	size = lerpf(size, target_position.y, delta * smoothing_speed)
+	
+	# Update bounds before seting pos to account for new size
 	update_map_bounds();
+	
+	global_position = global_position.lerp(target_position, delta * smoothing_speed).clamp(min_pos, max_pos)
+	
 	
 func _on_layout():
 	ImGui.set_next_window_size(600, 200, ImGui.COND_FIRST_USE_EVER);
@@ -157,7 +185,11 @@ func _on_layout():
 		ImGui.indent(20)
 		ImGui.text("Camera Local Position: "+str(position))
 		ImGui.text("Camera Global Position: "+str(global_position))
-		ImGui.text("Camera Position Relative to Map: " + str(map.global_position-global_position))
+		# (-1, 1) - Left Top
+		# (1, -1) - Right Bottom
+		var pos_relative_to_map;
+		
+		ImGui.text("Camera Position Relative to Map Center: " + str(map.global_position-global_position))
 		ImGui.unindent(20)
 		
 	if ImGui.collapsing_header("Camera Controls"):
@@ -165,6 +197,12 @@ func _on_layout():
 		pan_sensitivity = ImGui.slider_float("Pan sensitivity", pan_sensitivity, .1, 1.0);
 		zoom_sensitivity = ImGui.slider_float("Zoom sensitivity", zoom_sensitivity, .1, 1.0);
 		smoothing_speed = ImGui.slider_float("Smoothing Speed", smoothing_speed, 1, 30);
+		ImGui.unindent(20)
+	
+	if ImGui.collapsing_header("Camera Bounds"):
+		ImGui.indent(20)
+		ImGui.text("Camera Position Bounds: "+str(min_pos) +" - "+ str(max_pos))
+		ImGui.text("Camera Size Bounds: "+str(min_height) + " - " + str(max_height))
 		ImGui.unindent(20)
 	
 	ImGui.end()
