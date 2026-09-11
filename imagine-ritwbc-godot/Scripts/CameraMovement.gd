@@ -185,11 +185,32 @@ func _on_layout():
 		ImGui.indent(20)
 		ImGui.text("Camera Local Position: "+str(position))
 		ImGui.text("Camera Global Position: "+str(global_position))
-		# (-1, 1) - Left Top
-		# (1, -1) - Right Bottom
-		var pos_relative_to_map;
 		
-		ImGui.text("Camera Position Relative to Map Center: " + str(map.global_position-global_position))
+		# Get location relative
+		
+		var map_center_global: Vector3 = map.global_position + world_aabb_map.get_center()
+		var pos_relative_to_center: Vector3 = global_position - map_center_global
+
+		ImGui.text("Camera Position Relative to Map Center: " + str(pos_relative_to_center))
+
+		# Calculate true geometric center and total size
+		var bounds_center: Vector3 = (max_pos + min_pos) / 2.0
+		var bounds_size: Vector3 = (max_pos - min_pos).abs()
+
+		# Offset from center
+		var offset_from_center: Vector3 = global_position - bounds_center
+
+		# Normalize to [-1, 1] range (Offset / Half_Size)
+		var half_size: Vector3 = bounds_size / 2.0
+		var pos_relative_to_bounds: Vector3 = offset_from_center / half_size
+
+		ImGui.text("Camera Position Relative to Bounds: " + str(pos_relative_to_bounds))
+		if ImGui.is_item_hovered(ImGui.HOVERED_RECT_ONLY):
+			ImGui.begin_tooltip()
+			ImGui.text("Scale from -1 to 1")
+			ImGui.text("-1 is at min_pos, 0 is center, 1 is max pos")
+			ImGui.end_tooltip()
+
 		ImGui.unindent(20)
 		
 	if ImGui.collapsing_header("Camera Controls"):
