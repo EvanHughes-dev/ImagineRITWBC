@@ -22,6 +22,11 @@ var lastFramePos: Vector2 = Vector2.ZERO
 var mouseDown: bool = false
 
 func _ready() -> void:
+	
+	var win = SeparateWindow.new()
+	add_child(win)
+	win.open_window("Sub Window", 100, 100)
+	
 	target_position = global_position
 	
 	update_map_bounds()
@@ -146,7 +151,6 @@ func _process(delta: float) -> void:
 	update_map_bounds();
 	
 func _on_layout():
-
 	ImGui.set_next_window_size(600, 200, ImGui.COND_FIRST_USE_EVER);
 	ImGui.begin("Camera Data")
 	if(ImGui.collapsing_header("Camera Position")):

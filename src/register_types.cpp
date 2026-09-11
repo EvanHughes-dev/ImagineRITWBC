@@ -10,6 +10,8 @@
 #include "node_stack.h"
 #include "refcounted_stack.h"
 
+#include "separate_window.h"
+
 #include "definitions.h"
 
 using namespace godot;
@@ -48,6 +50,7 @@ void initialize_modules(ModuleInitializationLevel p_level)
     GDREGISTER_CLASS(RefCountedStack);
 
     GDREGISTER_CLASS(InputManager);
+    GDREGISTER_CLASS(SeparateWindow);
 
     Engine *engine = Engine::get_singleton();
 

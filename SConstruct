@@ -10,6 +10,31 @@ sources = []
 target = env["target"]  # "template_debug" or "template_release"
 print(target)
 
+# 1. Point to 'include' (NOT 'include/GLFW') so <GLFW/glfw3.h> resolves correctly
+env.Append(CPPPATH=["./src/glfw-3.5.1.bin.WIN64/include"])
+
+# 2. Point to your GLFW library directory (.lib)
+env.Append(LIBPATH=["./src/glfw-3.5.1.bin.WIN64/lib-vc2022"])
+
+# 3. Link GLFW and required Windows system libraries
+if env["platform"] == "windows":
+    env.Append(LIBS=[
+        "glfw3",
+        "opengl32",
+        "gdi32",
+        "user32",
+        "shell32",
+        "ucrt",
+        "vcruntime",
+        "msvcrt"
+    ])
+    
+    # Tell GLFW headers we are linking the static binary
+    env.Append(CPPDEFINES=["GLFW_STATIC"])
+    
+    # Prevent LIBCMT conflict while preserving C Runtime symbol resolution
+    env.Append(LINKFLAGS=["/NODEFAULTLIB:LIBCMT"])
+
 # Common usage — conditional logic based on target
 if target == "template_release":
     env.Append(CPPDEFINES=["NDEBUG"])
