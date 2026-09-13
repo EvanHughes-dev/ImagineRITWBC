@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://de2cyrwdb7f2p"]
+
+[ext_resource type="Texture2D" uid="uid://cxbos1okvhjv5" path="res://Assets/BasePoiBackground-NON-Commercial.png" id="1_wpjbx"]
+
+[node name="POI" type="Sprite3D" unique_id=276004613]
+transform = Transform3D(-0.05000001, 4.3711395e-09, 2.1855695e-09, 4.37114e-09, 0.050000012, -2.185569e-09, -2.18557e-09, -2.18557e-09, -0.050000012, 0, 0, 0)
+texture = ExtResource("1_wpjbx")

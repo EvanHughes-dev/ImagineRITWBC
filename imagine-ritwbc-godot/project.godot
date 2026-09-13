@@ -25,6 +25,7 @@ config/icon="res://icon.svg"
 DebugMenu="*uid://cggqb75a8w8r"
 G_InputWrapper="*uid://bb233lg5hieao"
 ImGui="*uid://dt1o3bp28yejj"
+Console="*uid://ouiu5xh1cs8n"
 
 [display]
 
@@ -36,7 +37,7 @@ window/stretch/aspect="expand"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/GDQuest_GDScript_formatter/plugin.cfg", "res://addons/dear-imgui-godot/plugin.cfg", "res://addons/debug_menu/plugin.cfg", "res://addons/script-ide/plugin.cfg")
+enabled=PackedStringArray("res://addons/GDQuest_GDScript_formatter/plugin.cfg", "res://addons/console/plugin.cfg", "res://addons/dear-imgui-godot/plugin.cfg", "res://addons/debug_menu/plugin.cfg", "res://addons/script-ide/plugin.cfg")
 
 [input]
 

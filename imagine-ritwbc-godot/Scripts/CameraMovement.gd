@@ -76,8 +76,6 @@ func set_zoom_max():
 		else:
 			max_height = size * yMult * aspect
 
-		
-
 func close_application(_name):
 	get_tree().quit(0);
 	
@@ -177,9 +175,10 @@ func _process(delta: float) -> void:
 	
 	global_position = global_position.lerp(target_position, delta * smoothing_speed).clamp(min_pos, max_pos)
 	
-	
+## Create GUI indatnce for debugging camer values
 func _on_layout():
-	ImGui.set_next_window_size(600, 200, ImGui.COND_FIRST_USE_EVER);
+	ImGui.set_next_window_size(0, 0, ImGui.COND_ALWAYS)
+
 	ImGui.begin("Camera Data")
 	if(ImGui.collapsing_header("Camera Position")):
 		ImGui.indent(20)
@@ -225,7 +224,4 @@ func _on_layout():
 		ImGui.text("Camera Position Bounds: "+str(min_pos) +" - "+ str(max_pos))
 		ImGui.text("Camera Size Bounds: "+str(min_height) + " - " + str(max_height))
 		ImGui.unindent(20)
-	
 	ImGui.end()
-	pass;
-	
