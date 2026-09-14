@@ -202,10 +202,11 @@ func set_mouse_down(_name) -> void:
 	var result: = space_state.intersect_ray(query)
 	
 	if result != {}:
-		var anchor := Node3D.new()
-		get_tree().root.add_child(anchor)
-		anchor.global_position = result.position
-		PopupManager.create_popup(anchor, "Header", "ljhgfkjhsad")
+		var parent:=(result.collider as Node3D).get_parent_node_3d()
+		print(parent)
+		if parent is poi:
+			parent.pressed()
+		
 	
 	mouseDown = true
 	lastFramePos = get_viewport().get_mouse_position()

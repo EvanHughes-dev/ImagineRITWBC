@@ -4,6 +4,8 @@
 
 [node name="PopupPanel" type="PanelContainer" unique_id=2114032897]
 custom_minimum_size = Vector2(220, 0)
+offset_right = 427.0
+offset_bottom = 64.0
 script = ExtResource("1_nlt3e")
 
 [node name="Margin" type="MarginContainer" parent="." unique_id=785291743]

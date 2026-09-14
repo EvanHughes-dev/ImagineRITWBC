@@ -1,13 +1,16 @@
 [gd_scene format=3 uid="uid://de2cyrwdb7f2p"]
 
-[ext_resource type="Texture2D" uid="uid://cxbos1okvhjv5" path="res://Assets/BasePoiBackground-NON-Commercial.png" id="1_wpjbx"]
+[ext_resource type="Texture2D" uid="uid://bi5bat7yqohql" path="res://Assets/Circle..png" id="1_wpjbx"]
+[ext_resource type="Script" uid="uid://thjqjre4w5s0" path="res://Scripts/poi.gd" id="2_dot68"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_dot68"]
-radius = 5.951153
+radius = 1.5338321
 
 [node name="POI" type="Sprite3D" unique_id=276004613]
-transform = Transform3D(-0.05, 4.3711395e-09, 7.54979e-09, 4.3711395e-09, 0.05, -2.1855697e-09, -7.54979e-09, -2.1855688e-09, -0.05, 0, 0, 0)
+transform = Transform3D(-0.4, 3.496912e-08, 6.039832e-08, 3.4969116e-08, 0.4, -1.7484556e-08, -6.039832e-08, -1.748455e-08, -0.4, 0, 0, 0)
+modulate = Color(1, 0.15294118, 0.10980392, 1)
 texture = ExtResource("1_wpjbx")
+script = ExtResource("2_dot68")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=1581982583]
 collision_layer = 2

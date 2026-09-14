@@ -5,7 +5,6 @@ extends Node
 ## for the same target updates/reuses instead of stacking duplicates.
 static var _active_popups: Dictionary = {} # Node3D -> CanvasLayer
 
-# Adjust this path if you place popup_panel.tscn somewhere else in your project.
 const PopupPanelScene: PackedScene = preload("res://ui/popup_panel.tscn")
 
 
