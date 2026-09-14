@@ -11,8 +11,6 @@ extends Camera3D
 @export var map: Sprite3D
 
 @onready var world_aabb_map: AABB = map.global_transform * map.get_aabb()
-@export var min_size: float = 2
-@export var max_size: float = 20
 @export var min_pos: Vector3
 @export var max_pos: Vector3
 
@@ -20,10 +18,11 @@ const BASE_ZOOM_VALUE: float = 2.0
 const BASE_PAN_VALUE: float = 0.05
 
 var target_position: Vector3
-var target_zoom: float;
-var lastFramePos: Vector2 = Vector2.ZERO
+
 var mouseDown: bool = false
 var display_debug: bool = false;
+
+signal camera_moved;
 
 ## Get the current aspect ratio
 var aspect: float:
@@ -46,19 +45,8 @@ func _ready() -> void:
 	initialize_input()
 	
 	Console.add_command("debug_camera", _toggle_gui)
-	G_InputWrapper.on_mouse_move(move_mouse)
 
-func move_mouse(_frmae_dstance: float, frame_delta: Vector2) -> void:
-	if mouseDown:
-		# Scale panning relative to current zoom level (smaller size = slower pan)
-		var zoom_factor: float = target_position.y / max_size
-		var pan_offset := Vector3(frame_delta.x, 0.0, frame_delta.y) * BASE_PAN_VALUE * pan_sensitivity * zoom_factor
-		
-		target_position += pan_offset
-		
-		# Clamp target position against target bounds
-		var target_bounds := get_bounds_for_height(target_position.y)
-		target_position = target_position.clamp(target_bounds["min"], target_bounds["max"])	
+
 
 func _process(delta: float) -> void:
 	if !target_position.is_equal_approx(global_position):
@@ -69,6 +57,8 @@ func _process(delta: float) -> void:
 		var current_bounds := get_bounds_for_height(size)
 		var lerped_pos := global_position.lerp(target_position, delta * smoothing_speed)
 		global_position = lerped_pos.clamp(current_bounds["min"], current_bounds["max"])
+		
+		camera_moved.emit(self, get_viewport().get_visible_rect())
 
 func initialize_input():
 	G_InputWrapper.on_press("mouse_pressed", set_mouse_down)
@@ -76,10 +66,117 @@ func initialize_input():
 	G_InputWrapper.on_press("zoom_in", zoom_in)
 	G_InputWrapper.on_press("zoom_out", zoom_out)
 	G_InputWrapper.on_press("escape", close_application)
+	G_InputWrapper.on_mouse_move(move_moused)
+
+func move_moused(_frmae_dstance: float, frame_delta: Vector2) -> void:
+	if mouseDown:
+		# Scale panning relative to current zoom level (smaller size = slower pan)
+		var zoom_factor: float = target_position.y / max_pos.y
+		var pan_offset := Vector3(frame_delta.x, 0.0, frame_delta.y) * BASE_PAN_VALUE * pan_sensitivity * zoom_factor
+		
+		target_position += pan_offset
+		
+		# Clamp target position against target bounds
+		var target_bounds := get_bounds_for_height(target_position.y)
+		target_position = target_position.clamp(target_bounds["min"], target_bounds["max"])	
 
 func close_application(_name):
 	get_tree().quit(0);
+
+func zoom_poi(poi_target: poi):
+	zoom_to_point(poi_target.global_position, 2.0)
+	pass;
 	
+func zoom_to_point(new_target: Vector3, new_size: float) -> void:
+	if is_zero_approx(target_position.y):
+		return
+
+	# Move directly to the new target's X/Z coordinates at the new height
+	var new_pos: Vector3 = Vector3(new_target.x, new_size, new_target.z)
+
+	# Clamp using height-specific bounds to prevent edge popping
+	var target_bounds := get_bounds_for_height(new_size)
+	target_position = new_pos.clamp(target_bounds["min"], target_bounds["max"])
+
+#region Mouse Input
+
+## Set mouse as down and detect poi press
+func set_mouse_down(_name) -> void:
+	var mouse_pos: Vector2 = get_viewport().get_mouse_position()
+	var ray_origin: Vector3 = project_ray_origin(mouse_pos)
+	var ray_dir: Vector3 = project_ray_normal(mouse_pos)
+	var ground_y: float = map.global_position.y if map else 0.0
+
+	var mousePosMap: = find_map_pos_of_mouse(ground_y, ray_origin, ray_dir)
+	
+	var space_state = get_world_3d().direct_space_state
+	var query: = PhysicsRayQueryParameters3D.create(ray_origin, mousePosMap, 2, []); 
+	var result: = space_state.intersect_ray(query)
+	
+	if result != {}:
+		var parent:=(result.collider as Node3D).get_parent_node_3d()
+		if parent is poi:
+			parent.pressed()
+			zoom_poi(parent)
+			pass;
+	
+	mouseDown = true
+
+func set_mouse_up(_name) -> void:
+	mouseDown = false
+
+func zoom_in(_name) -> void:
+	zoom_towards_mouse(-BASE_ZOOM_VALUE * zoom_sensitivity)
+
+func zoom_out(_name) -> void:
+	zoom_towards_mouse(BASE_ZOOM_VALUE * zoom_sensitivity)
+
+## Zoom the camera in and out based on the mouse position
+func zoom_towards_mouse(amount: float) -> void:
+	var old_size: float = target_position.y
+	var new_size: float = clampf(old_size + amount, min_pos.y, max_pos.y)
+
+	if is_zero_approx(new_size - old_size):
+		return
+
+	var mouse_pos: Vector2 = get_viewport().get_mouse_position()
+	var ray_origin: Vector3 = project_ray_origin(mouse_pos)
+	var ray_dir: Vector3 = project_ray_normal(mouse_pos)
+
+	# Avoid division by zero if camera looks parallel to ground
+	if abs(ray_dir.y) < 0.001:
+		target_position.y = new_size
+		return
+
+	# Target plane height (samples map Y position if assigned, otherwise 0.0)
+	var ground_y: float = map.global_position.y if map else 0.0
+
+	# Prevent division by zero if camera target is on the ground plane
+	if is_zero_approx(old_size - ground_y):
+		target_position.y = new_size
+		return
+	
+	# calculate zoom
+	var new_target := find_map_pos_of_mouse(ground_y, ray_origin, ray_dir)
+
+	if is_zero_approx(target_position.y):
+		return
+
+	# Scale target position outward/inward from the ground point under the cursor
+	var scale_factor: float = new_size / target_position.y
+	var new_pos: Vector3 = new_target + (target_position - new_target) * scale_factor
+	new_pos.y = new_size
+
+	# Clamp using height-specific bounds to prevent edge popping
+	var target_bounds := get_bounds_for_height(new_size)
+	target_position = new_pos.clamp(target_bounds["min"], target_bounds["max"])
+
+## Find the Vector3 position of the mouse on the map below
+func find_map_pos_of_mouse(ground_y: float, ray_origin: Vector3, ray_dir: Vector3)->Vector3:
+	var t: float = (ground_y - ray_origin.y) / ray_dir.y
+	return ray_origin + ray_dir * t
+#endregion
+
 #region Mouse Clamping
 
 ## Returns min and max Vector3 bounds calculated for a specific camera size
@@ -92,12 +189,12 @@ func get_bounds_for_height(target_h: float) -> Dictionary:
 
 	var calculated_min := Vector3(
 		world_aabb_map.position.x + half_visible.x,
-		min_size,
+		min_pos.y,
 		world_aabb_map.position.z + half_visible.y
 	)
 	var calculated_max := Vector3(
 		world_aabb_map.end.x - half_visible.x,
-		max_size,
+		max_pos.y,
 		world_aabb_map.end.z - half_visible.y
 	)
 
@@ -124,12 +221,12 @@ func update_map_bounds() -> void:
 	# so the view edge stays within the map, not the camera position.
 	min_pos = Vector3(
 		world_aabb_map.position.x + half_visible.x,
-		min_size,
+		2.0,
 		world_aabb_map.position.z + half_visible.y
 	)
 	max_pos = Vector3(
 		world_aabb_map.end.x - half_visible.x,
-		max_size,
+		max_pos.y,
 		world_aabb_map.end.z - half_visible.y
 	)
 
@@ -157,14 +254,14 @@ func set_zoom_max():
 	# Smaller value is the lowest scale to increase
 	if xMult < yMult:
 		if keep_aspect == KEEP_HEIGHT:
-			max_size = size * xMult / aspect
+			max_pos.y = size * xMult / aspect
 		else:
-			max_size = size * xMult
+			max_pos.y = size * xMult
 	else:
 		if keep_aspect == KEEP_HEIGHT:
-			max_size = size * yMult
+			max_pos.y = size * yMult
 		else:
-			max_size = size * yMult * aspect
+			max_pos.y = size * yMult * aspect
 
 ## Determine how much of the map the camera can see
 func get_visible_size() -> Vector2:
@@ -185,85 +282,6 @@ func get_visible_size_at_height(custom_size: float = -1.0) -> Vector2:
 	else:
 		return Vector2(h, h / aspect)
 
-#endregion
-
-#region Mouse Input
-
-func set_mouse_down(_name) -> void:
-	var mouse_pos: Vector2 = get_viewport().get_mouse_position()
-	var ray_origin: Vector3 = project_ray_origin(mouse_pos)
-	var ray_dir: Vector3 = project_ray_normal(mouse_pos)
-	var ground_y: float = map.global_position.y if map else 0.0
-
-	var mousePosMap: = find_map_pos_of_mouse(ground_y, ray_origin, ray_dir)
-	
-	var space_state = get_world_3d().direct_space_state
-	var query: = PhysicsRayQueryParameters3D.create(ray_origin, mousePosMap, 2, []); 
-	var result: = space_state.intersect_ray(query)
-	
-	if result != {}:
-		var parent:=(result.collider as Node3D).get_parent_node_3d()
-		if parent is poi:
-			parent.pressed()
-		
-	
-	mouseDown = true
-	lastFramePos = get_viewport().get_mouse_position()
-
-func set_mouse_up(_name) -> void:
-	mouseDown = false
-
-func zoom_in(_name) -> void:
-	zoom_towards_mouse(-BASE_ZOOM_VALUE * zoom_sensitivity)
-
-func zoom_out(_name) -> void:
-	zoom_towards_mouse(BASE_ZOOM_VALUE * zoom_sensitivity)
-
-## Zoom the camera in and out based on the mouse position
-func zoom_towards_mouse(amount: float) -> void:
-	var old_size: float = target_position.y
-	var new_size: float = clampf(old_size + amount, min_size, max_size)
-
-	if is_zero_approx(new_size - old_size):
-		return
-
-	var mouse_pos: Vector2 = get_viewport().get_mouse_position()
-	var ray_origin: Vector3 = project_ray_origin(mouse_pos)
-	var ray_dir: Vector3 = project_ray_normal(mouse_pos)
-
-	# Avoid division by zero if camera looks parallel to ground
-	if abs(ray_dir.y) < 0.001:
-		target_position.y = new_size
-		return
-
-	# Target plane height (samples map Y position if assigned, otherwise 0.0)
-	var ground_y: float = map.global_position.y if map else 0.0
-
-	# 1. Find ground position under mouse before zooming
-	var hit_point_before: = find_map_pos_of_mouse(ground_y, ray_origin, ray_dir)
-
-	# 2. Predict where that ray origin shifts relative to camera center at the new size
-	var size_ratio: float = new_size / old_size
-	var ray_offset: Vector3 = ray_origin - global_position
-
-	var new_ray_origin: Vector3 = target_position + (ray_offset * size_ratio)
-	new_ray_origin.y = new_size
-	
-	var new_t: float = (ground_y - new_ray_origin.y) / ray_dir.y
-	var hit_point_after: Vector3 = new_ray_origin + ray_dir * new_t
-
-	# 3. Shift target position to keep ground point stationary under the cursor
-	var shift: Vector3 = hit_point_before - hit_point_after
-	target_position.x += shift.x
-	target_position.z += shift.z
-	target_position.y = new_size
-
-	target_position = target_position.clamp(min_pos, max_pos)
-
-## Find the Vector3 position of the mouse on the map below
-func find_map_pos_of_mouse(ground_y: float, ray_origin: Vector3, ray_dir: Vector3)->Vector3:
-	var t: float = (ground_y - ray_origin.y) / ray_dir.y
-	return ray_origin + ray_dir * t
 #endregion
 
 #region Debugging
@@ -321,7 +339,7 @@ func _on_layout():
 	if ImGui.collapsing_header("Camera Bounds"):
 		ImGui.indent(20)
 		ImGui.text("Camera Position Bounds: "+str(min_pos) +" - "+ str(max_pos))
-		ImGui.text("Camera Size Bounds: "+str(min_size) + " - " + str(max_size))
+		ImGui.text("Camera Size Bounds: "+str(min_pos.y) + " - " + str(max_pos.y))
 		ImGui.unindent(20)
 	ImGui.end()
 

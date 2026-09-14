@@ -7,6 +7,9 @@ static var _active_popups: Dictionary = {} # Node3D -> CanvasLayer
 
 const PopupPanelScene: PackedScene = preload("res://ui/popup_panel.tscn")
 
+#region Popup Instances
+
+## Create a new popup around the provided Node3D
 static func create_popup(
 	target: Node3D,
 	header_text: String,
@@ -35,7 +38,6 @@ static func create_popup(
 	_active_popups[target] = canvas_layer
 	return canvas_layer
 
-
 ## Explicitly close a popup for a given target (e.g. on deselect, click-away).
 static func close_popup(target: Node3D) -> void:
 	if not _active_popups.has(target):
@@ -45,6 +47,7 @@ static func close_popup(target: Node3D) -> void:
 	if is_instance_valid(canvas):
 		canvas.queue_free()
 
-
+## Check if a Node3D already has a node assigned to it
 static func has_popup(target: Node3D) -> bool:
 	return _active_popups.has(target) and is_instance_valid(_active_popups[target])
+#endregion
