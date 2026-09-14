@@ -9,6 +9,7 @@
 [node name="Camera3D" type="Camera3D" parent="." unique_id=461650827 node_paths=PackedStringArray("map")]
 transform = Transform3D(-1, 8.742278e-08, 3.821371e-15, 0, -4.371139e-08, 1, 8.742278e-08, 1, 4.371139e-08, 0, 10, 0)
 projection = 1
+current = true
 size = 10.0
 script = ExtResource("1_4a80b")
 map = NodePath("../Sprite3D")
@@ -18,4 +19,5 @@ transform = Transform3D(-0.9999999, 8.7422755e-08, -4.3711378e-08, -4.3711385e-0
 texture = ExtResource("2_r0f7s")
 
 [node name="POI" parent="Sprite3D" unique_id=276004613 instance=ExtResource("3_4a80b")]
-transform = Transform3D(-0.05000001, 4.371141e-09, 7.549792e-09, 4.37114e-09, 0.050000012, -2.1855702e-09, -7.549791e-09, -2.1855695e-09, -0.050000012, -13.5640135, 5.740991, 1.070589)
+transform = Transform3D(0.05, 0, 6.195215e-17, 0, -0.05, -4.371139e-09, 8.351873e-24, 4.371139e-09, -0.05, -13.5640135, 5.740991, 0.20273827)
+layers = 2

@@ -190,6 +190,23 @@ func get_visible_size_at_height(custom_size: float = -1.0) -> Vector2:
 #region Mouse Input
 
 func set_mouse_down(_name) -> void:
+	var mouse_pos: Vector2 = get_viewport().get_mouse_position()
+	var ray_origin: Vector3 = project_ray_origin(mouse_pos)
+	var ray_dir: Vector3 = project_ray_normal(mouse_pos)
+	var ground_y: float = map.global_position.y if map else 0.0
+
+	var mousePosMap: = find_map_pos_of_mouse(ground_y, ray_origin, ray_dir)
+	
+	var space_state = get_world_3d().direct_space_state
+	var query: = PhysicsRayQueryParameters3D.create(ray_origin, mousePosMap, 2, []); 
+	var result: = space_state.intersect_ray(query)
+	
+	if result != {}:
+		var anchor := Node3D.new()
+		get_tree().root.add_child(anchor)
+		anchor.global_position = result.position
+		PopupManager.create_popup(anchor, "Header", "ljhgfkjhsad")
+	
 	mouseDown = true
 	lastFramePos = get_viewport().get_mouse_position()
 
@@ -223,8 +240,7 @@ func zoom_towards_mouse(amount: float) -> void:
 	var ground_y: float = map.global_position.y if map else 0.0
 
 	# 1. Find ground position under mouse before zooming
-	var t: float = (ground_y - ray_origin.y) / ray_dir.y
-	var hit_point_before: Vector3 = ray_origin + ray_dir * t
+	var hit_point_before: = find_map_pos_of_mouse(ground_y, ray_origin, ray_dir)
 
 	# 2. Predict where that ray origin shifts relative to camera center at the new size
 	var size_ratio: float = new_size / old_size
@@ -244,6 +260,10 @@ func zoom_towards_mouse(amount: float) -> void:
 
 	target_position = target_position.clamp(min_pos, max_pos)
 
+## Find the Vector3 position of the mouse on the map below
+func find_map_pos_of_mouse(ground_y: float, ray_origin: Vector3, ray_dir: Vector3)->Vector3:
+	var t: float = (ground_y - ray_origin.y) / ray_dir.y
+	return ray_origin + ray_dir * t
 #endregion
 
 #region Debugging

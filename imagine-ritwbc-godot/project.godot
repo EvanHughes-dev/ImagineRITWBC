@@ -8,6 +8,10 @@
 
 config_version=5
 
+[DebugMenu]
+
+settings/startup_visibility=1
+
 [application]
 
 config/name="ImagineRITWBC"
@@ -22,6 +26,7 @@ DebugMenu="*uid://cggqb75a8w8r"
 G_InputWrapper="*uid://bb233lg5hieao"
 ImGui="*uid://dt1o3bp28yejj"
 Console="*uid://ouiu5xh1cs8n"
+G_Popup="*uid://d2hxm8v0gspfu"
 
 [display]
 

@@ -2,6 +2,16 @@
 
 [ext_resource type="Texture2D" uid="uid://cxbos1okvhjv5" path="res://Assets/BasePoiBackground-NON-Commercial.png" id="1_wpjbx"]
 
+[sub_resource type="SphereShape3D" id="SphereShape3D_dot68"]
+radius = 5.951153
+
 [node name="POI" type="Sprite3D" unique_id=276004613]
-transform = Transform3D(-0.05000001, 4.3711395e-09, 2.1855695e-09, 4.37114e-09, 0.050000012, -2.185569e-09, -2.18557e-09, -2.18557e-09, -0.050000012, 0, 0, 0)
+transform = Transform3D(-0.05, 4.3711395e-09, 7.54979e-09, 4.3711395e-09, 0.05, -2.1855697e-09, -7.54979e-09, -2.1855688e-09, -0.05, 0, 0, 0)
 texture = ExtResource("1_wpjbx")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=1581982583]
+collision_layer = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=1284079553]
+transform = Transform3D(1, -5.051929e-16, 0, -5.051929e-16, 1, 0, 0, 0, 1, 0, 0, 0)
+shape = SubResource("SphereShape3D_dot68")
