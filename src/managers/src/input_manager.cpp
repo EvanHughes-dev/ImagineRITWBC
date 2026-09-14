@@ -3,75 +3,87 @@
 #include <godot_cpp/classes/input_map.hpp>
 #include <algorithm>
 
+void InputManager::_bind_methods()
+{
+    bind_method(D_METHOD("_process", "mousePos", "delta"), &InputManager::_process);
+    bind_method(D_METHOD("_input", "event"), &InputManager::_input);
+
+    bind_method(D_METHOD("isActionPressed", "action"), &InputManager::isActionPressed);
+    bind_method(D_METHOD("isActionJustPressed", "action"), &InputManager::isActionJustPressed);
+    bind_method(D_METHOD("isActionJustReleased", "action"), &InputManager::isActionJustReleased);
+
+    bind_method(D_METHOD("assignOnPress", "action", "callable", "allowMult"), &InputManager::assignOnPress, DEFVAL(false));
+    bind_method(D_METHOD("assignOnRelease", "action", "callable", "allowMult"), &InputManager::assignOnRelease, DEFVAL(false));
+    bind_method(D_METHOD("assignOnMouseMove", "callable", "allowMult"), &InputManager::assignOnMouseMove, DEFVAL(false));
+
+    bind_method(D_METHOD("removeOnPress", "action", "callable"), &InputManager::removeOnPress);
+    bind_method(D_METHOD("removeOnRelease", "action", "callable"), &InputManager::removeOnRelease);
+    bind_method(D_METHOD("removeOnMouseMove", "callable"), &InputManager::removeOnMouseMove);
+
+    bind_method(D_METHOD("onWindowStopTarget"), &InputManager::onWindowStopTarget);
+}
+
 InputManager::InputManager()
-    : m_pImportantActions(nullptr), m_uImportantActionsCount(0)
 {
     godot::UtilityFunctions::print("Creating Input Manager");
 
-    godot::InputMap *input = godot::InputMap::get_singleton();
-    inputRef = Input::get_singleton();
+    godot::InputMap *inputMap = godot::InputMap::get_singleton();
+    if (!inputMap)
+        return;
 
-    GDArray<StringName> actions = input->get_actions();
+    GDArray<StringName> actions = inputMap->get_actions();
 
-    std::vector<StringName> userActions;
-
-    // Loop over all action names
+    // Cache non-default actions into vector and initialize map buckets
     for (int i = 0; i < actions.size(); i++)
     {
         const StringName &action = actions[i];
 
-        // Any action starting with ui_ us part of the default map
-        // We only want our defined ones
         if (!action.begins_with("ui_"))
         {
-
             m_mOnPress[action] = std::vector<Callable>();
             m_mOnRelease[action] = std::vector<Callable>();
-
-            userActions.push_back(action);
+            m_vImportantActions.push_back(action);
         }
     }
-
-    m_uImportantActionsCount = userActions.size();
-    m_pImportantActions = new StringName[m_uImportantActionsCount];
-
-    std::copy(userActions.begin(), userActions.end(), m_pImportantActions);
 }
 
 InputManager::~InputManager()
 {
-    SafeDeleteArray(m_pImportantActions);
 }
 
-bool InputManager::containsCallback(const std::vector<Callable> &searchVector, const Callable &searchCall)
+bool InputManager::containsCallback(const std::vector<Callable> &searchVector, const Callable &searchCall) const
 {
-    for (uint i = 0; i < searchVector.size(); i++)
-        if (searchVector[i] == searchCall)
-            return true;
-
-    return false;
+    return std::find(searchVector.begin(), searchVector.end(), searchCall) != searchVector.end();
 }
 
 void InputManager::clearKeyboardState(bool callFunction)
 {
-    for (uint i = 0; i < m_uImportantActionsCount; i++)
+    for (const StringName &action : m_vImportantActions)
     {
-        StringName &action = m_pImportantActions[i];
-        bool wasPressed = m_mCurrentPressedActions[action];
+        // Safe lookup without mutating map
+        auto it = m_mCurrentPressedActions.find(action);
+        bool wasPressed = (it != m_mCurrentPressedActions.end()) ? it->second : false;
 
         m_mCurrentPressedActions[action] = false;
         m_mLastPressedActions[action] = false;
 
         if (callFunction && wasPressed)
+        {
             callFunctions(action, false);
+        }
     }
 }
 
 void InputManager::callFunctions(const StringName &actionKey, bool isActionPressed)
 {
-    std::vector<Callable> callbackFunctions = isActionPressed
-                                                  ? m_mOnPress[actionKey]
-                                                  : m_mOnRelease[actionKey];
+    const auto &map = isActionPressed ? m_mOnPress : m_mOnRelease;
+    auto it = map.find(actionKey);
+    if (it == map.end())
+        return;
+
+    // Create a local copy during invocation to prevent crash/invalidation
+    // if a callback registers/unregisters callbacks during its call.
+    const std::vector<Callable> callbackFunctions = it->second;
 
     for (const Callable &functionCall : callbackFunctions)
     {
@@ -82,134 +94,175 @@ void InputManager::callFunctions(const StringName &actionKey, bool isActionPress
     }
 }
 
+void InputManager::eraseCallback(const Callable &callbackFunc, std::vector<Callable> &vec)
+{
+    vec.erase(std::remove(vec.begin(), vec.end(), callbackFunc), vec.end());
+}
+
 void InputManager::_input(const Ref<InputEvent> &event)
 {
-
-    for (uint i = 0; i < m_uImportantActionsCount; i++)
+    // Early exit non-action input events (e.g. raw mouse movement) to avoid looping actions needlessly
+    if (event.is_null() || !event->is_action_type())
     {
-        StringName &actionKey = m_pImportantActions[i];
+        return;
+    }
 
+    for (const StringName &actionKey : m_vImportantActions)
+    {
         if (event->is_action(actionKey))
         {
-
             bool isActionPressed = event->is_action_pressed(actionKey);
             bool isActionReleased = event->is_action_released(actionKey);
 
+            // Skip echo or non-state-change events
             if (!isActionPressed && !isActionReleased)
             {
-
                 continue;
-                ;
             }
-            m_mCurrentPressedActions[actionKey] = isActionPressed;
 
+            m_mCurrentPressedActions[actionKey] = isActionPressed;
             callFunctions(actionKey, isActionPressed);
 
-            m_vChangedActions.push_back(actionKey); // cache changed actions
+            m_vChangedActions.push_back(actionKey);
         }
     }
 }
 
-void InputManager::_process()
+void InputManager::_process(const godot::Vector2 &mousePos, const float &delta)
 {
-
-    // Swap the current and last frame's keyboard
-    // Only swap changed actions
+    // Synchronize current state to last frame state for changed actions only
     for (const StringName &key : m_vChangedActions)
     {
         m_mLastPressedActions[key] = m_mCurrentPressedActions[key];
     }
     m_vChangedActions.clear();
 
-    for (const auto &pair : m_mOnPressAdd)
+    // Flush staged callback additions
+    for (const auto &[action, callables] : m_mOnPressAdd)
     {
-        for (Callable call : pair.second)
-            m_mOnPress[pair.first].push_back(call);
+        auto &targetVec = m_mOnPress[action];
+        targetVec.insert(targetVec.end(), callables.begin(), callables.end());
     }
 
-    for (const auto &pair : m_mOnReleaseAdd)
+    for (const auto &[action, callables] : m_mOnReleaseAdd)
     {
-        for (Callable call : pair.second)
-            m_mOnRelease[pair.first].push_back(call);
+        auto &targetVec = m_mOnRelease[action];
+        targetVec.insert(targetVec.end(), callables.begin(), callables.end());
     }
+
+    for (const Callable &callable : m_vOnMouseMoveAdd)
+    {
+        m_vOnMouseMove.push_back(callable);
+    }
+
+    // Update any mouse movement
+    if (m_bfirstFramePast)
+    {
+
+        float mouseDistanceSquared = mousePos.distance_squared_to(m_vMousePosLastFrame);
+
+        // Has to at least have moved 1 unit. Sqrt of x when x>1 is >1
+        if (mouseDistanceSquared >= 1.0f)
+        {
+            for (const Callable &callable : m_vOnMouseMove)
+            {
+                if (callable.is_valid() && !callable.is_null())
+                    callable.call(mouseDistanceSquared, mousePos - m_vMousePosLastFrame);
+            }
+        }
+        // godot::UtilityFunctions::print(godot::vformat("Mouse moved %.2f units", mouseDistanceSquared));
+    }
+    else
+        m_bfirstFramePast = true;
+
+    m_vMousePosLastFrame = mousePos;
 
     m_mOnPressAdd.clear();
     m_mOnReleaseAdd.clear();
+    m_vOnMouseMoveAdd.clear();
 }
 
 /***** Access Functions *****/
 
-bool InputManager::isActionPressed(const StringName &key)
+bool InputManager::isActionPressed(const StringName &key) const
 {
-    return m_mCurrentPressedActions[key];
+    auto it = m_mCurrentPressedActions.find(key);
+    return (it != m_mCurrentPressedActions.end()) ? it->second : false;
 }
 
-bool InputManager::isActionJustPressed(const StringName &key)
+bool InputManager::isActionJustPressed(const StringName &key) const
 {
-    return m_mCurrentPressedActions[key] && !m_mLastPressedActions[key];
+    auto currIt = m_mCurrentPressedActions.find(key);
+    auto lastIt = m_mLastPressedActions.find(key);
+
+    bool curr = (currIt != m_mCurrentPressedActions.end()) ? currIt->second : false;
+    bool last = (lastIt != m_mLastPressedActions.end()) ? lastIt->second : false;
+
+    return curr && !last;
 }
 
-bool InputManager::isActionJustReleased(const StringName &key)
+bool InputManager::isActionJustReleased(const StringName &key) const
 {
-    return !m_mCurrentPressedActions[key] && m_mLastPressedActions[key];
+    auto currIt = m_mCurrentPressedActions.find(key);
+    auto lastIt = m_mLastPressedActions.find(key);
+
+    bool curr = (currIt != m_mCurrentPressedActions.end()) ? currIt->second : false;
+    bool last = (lastIt != m_mLastPressedActions.end()) ? lastIt->second : false;
+
+    return !curr && last;
 }
 
 void InputManager::assignOnPress(const StringName &action, const Callable &callbackFunc, bool allowMult)
 {
-    if (!allowMult && containsCallback(m_mOnPress[action], callbackFunc))
-        return;
+    // Check both active and pending buffers to avoid duplicate queueing in the same frame
+    if (!allowMult)
+    {
+        if (containsCallback(m_mOnPress[action], callbackFunc) ||
+            containsCallback(m_mOnPressAdd[action], callbackFunc))
+        {
+            return;
+        }
+    }
     m_mOnPressAdd[action].push_back(callbackFunc);
 }
 
 void InputManager::assignOnRelease(const StringName &action, const Callable &callbackFunc, bool allowMult)
 {
-    if (!allowMult && containsCallback(m_mOnRelease[action], callbackFunc))
-        return;
+    if (!allowMult)
+    {
+        if (containsCallback(m_mOnRelease[action], callbackFunc) ||
+            containsCallback(m_mOnReleaseAdd[action], callbackFunc))
+        {
+            return;
+        }
+    }
     m_mOnReleaseAdd[action].push_back(callbackFunc);
+}
+
+void InputManager::assignOnMouseMove(const Callable &callbackFunc, bool allowMult)
+{
+    if (!allowMult && (containsCallback(m_vOnMouseMove, callbackFunc) || containsCallback(m_vOnMouseMoveAdd, callbackFunc)))
+        return;
+
+    m_vOnMouseMove.push_back(callbackFunc);
 }
 
 void InputManager::removeOnPress(const StringName &action, const Callable &callbackFunc)
 {
-    std::vector<Callable> &currentVector = m_mOnPress[action];
-
-    // loop over all elements of the iterator
-    // remove any that match the callback function passed
-    // O(n) removal
-
-    for (std::vector<Callable>::iterator iterator = currentVector.begin(); iterator != currentVector.end();)
-    {
-        if (*iterator == callbackFunc)
-        {
-            iterator = currentVector.erase(iterator); // erase returns next valid iterator
-        }
-        else
-        {
-            ++iterator;
-        }
-    }
+    eraseCallback(callbackFunc, m_mOnPress[action]);
+    eraseCallback(callbackFunc, m_mOnPressAdd[action]);
 }
 
 void InputManager::removeOnRelease(const StringName &action, const Callable &callbackFunc)
 {
+    eraseCallback(callbackFunc, m_mOnRelease[action]);
+    eraseCallback(callbackFunc, m_mOnReleaseAdd[action]);
+}
 
-    std::vector<Callable> &currentVector = m_mOnRelease[action];
-
-    // loop over all elements of the iterator
-    // remove any that match the callback function passed
-
-    // O(n) removal
-    for (std::vector<Callable>::iterator iterator = currentVector.begin(); iterator != currentVector.end();)
-    {
-
-        if (*iterator == callbackFunc)
-        {
-            iterator = currentVector.erase(iterator); // erase returns next valid iterator
-        }
-        else
-        {
-            ++iterator;
-        }
-    }
+void InputManager::removeOnMouseMove(const Callable &callbackFunc)
+{
+    eraseCallback(callbackFunc, m_vOnMouseMove);
+    eraseCallback(callbackFunc, m_vOnMouseMoveAdd);
 }
 
 void InputManager::onWindowStopTarget()

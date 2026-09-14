@@ -11,8 +11,8 @@ extends Camera3D
 @export var map: Sprite3D
 
 @onready var world_aabb_map: AABB = map.global_transform * map.get_aabb()
-@export var min_height: float = 2
-@export var max_height: float = 20
+@export var min_size: float = 2
+@export var max_size: float = 20
 @export var min_pos: Vector3
 @export var max_pos: Vector3
 
@@ -23,6 +23,7 @@ var target_position: Vector3
 var target_zoom: float;
 var lastFramePos: Vector2 = Vector2.ZERO
 var mouseDown: bool = false
+var display_debug: bool = false;
 
 ## Get the current aspect ratio
 var aspect: float:
@@ -44,7 +45,30 @@ func _ready() -> void:
 	
 	initialize_input()
 	
-	ImGui.imgui_layout.connect(_on_layout)
+	Console.add_command("debug_camera", _toggle_gui)
+	G_InputWrapper.on_mouse_move(move_mouse)
+
+func move_mouse(_frmae_dstance: float, frame_delta: Vector2) -> void:
+	if mouseDown:
+		# Scale panning relative to current zoom level (smaller size = slower pan)
+		var zoom_factor: float = target_position.y / max_size
+		var pan_offset := Vector3(frame_delta.x, 0.0, frame_delta.y) * BASE_PAN_VALUE * pan_sensitivity * zoom_factor
+		
+		target_position += pan_offset
+		
+		# Clamp target position against target bounds
+		var target_bounds := get_bounds_for_height(target_position.y)
+		target_position = target_position.clamp(target_bounds["min"], target_bounds["max"])	
+
+func _process(delta: float) -> void:
+	if !target_position.is_equal_approx(global_position):
+		# Smoothly interpolate height size
+		size = lerpf(size, target_position.y, delta * smoothing_speed)
+		
+		# Smoothly interpolate position and clamp against bounds for the CURRENT smoothed size
+		var current_bounds := get_bounds_for_height(size)
+		var lerped_pos := global_position.lerp(target_position, delta * smoothing_speed)
+		global_position = lerped_pos.clamp(current_bounds["min"], current_bounds["max"])
 
 func initialize_input():
 	G_InputWrapper.on_press("mouse_pressed", set_mouse_down)
@@ -52,34 +76,41 @@ func initialize_input():
 	G_InputWrapper.on_press("zoom_in", zoom_in)
 	G_InputWrapper.on_press("zoom_out", zoom_out)
 	G_InputWrapper.on_press("escape", close_application)
-	
-func set_zoom_max():
-	
-	var visible_size: Vector2 = get_visible_size()
-	
-	# world_aabb_map.size.z = visble_size.y * yMult
-	
-	# Determine % of how to zoom out before reaching bounds
-	var xMult: float = world_aabb_map.size.x / visible_size.x
-	var yMult: float = world_aabb_map.size.z / visible_size.y
-	
-	# Set heights based on mult value
-	# Smaller value is the lowest scale to increase
-	if xMult < yMult:
-		if keep_aspect == KEEP_HEIGHT:
-			max_height = size * xMult / aspect
-		else:
-			max_height = size * xMult
-	else:
-		if keep_aspect == KEEP_HEIGHT:
-			max_height = size * yMult
-		else:
-			max_height = size * yMult * aspect
 
 func close_application(_name):
 	get_tree().quit(0);
 	
 #region Mouse Clamping
+
+## Returns min and max Vector3 bounds calculated for a specific camera size
+func get_bounds_for_height(target_h: float) -> Dictionary:
+	if not map:
+		return {"min": min_pos, "max": max_pos}
+
+	var visible_size := get_visible_size_at_height(target_h)
+	var half_visible := visible_size * 0.5
+
+	var calculated_min := Vector3(
+		world_aabb_map.position.x + half_visible.x,
+		min_size,
+		world_aabb_map.position.z + half_visible.y
+	)
+	var calculated_max := Vector3(
+		world_aabb_map.end.x - half_visible.x,
+		max_size,
+		world_aabb_map.end.z - half_visible.y
+	)
+
+	if calculated_min.x > calculated_max.x:
+		var cx := (world_aabb_map.position.x + world_aabb_map.end.x) * 0.5
+		calculated_min.x = cx
+		calculated_max.x = cx
+	if calculated_min.z > calculated_max.z:
+		var cz := (world_aabb_map.position.z + world_aabb_map.end.z) * 0.5
+		calculated_min.z = cz
+		calculated_max.z = cz
+
+	return {"min": calculated_min, "max": calculated_max}
 
 ## Update the min and max position based on distance from mao
 func update_map_bounds() -> void:
@@ -93,12 +124,12 @@ func update_map_bounds() -> void:
 	# so the view edge stays within the map, not the camera position.
 	min_pos = Vector3(
 		world_aabb_map.position.x + half_visible.x,
-		min_height,
+		min_size,
 		world_aabb_map.position.z + half_visible.y
 	)
 	max_pos = Vector3(
 		world_aabb_map.end.x - half_visible.x,
-		max_height,
+		max_size,
 		world_aabb_map.end.z - half_visible.y
 	)
 
@@ -113,6 +144,28 @@ func update_map_bounds() -> void:
 		min_pos.z = cz
 		max_pos.z = cz
 
+## Set the max zoom value for camera
+func set_zoom_max():
+	
+	var visible_size: Vector2 = get_visible_size()
+		
+	# Determine % of how to zoom out before reaching bounds
+	var xMult: float = world_aabb_map.size.x / visible_size.x
+	var yMult: float = world_aabb_map.size.z / visible_size.y
+	
+	# Set heights based on mult value
+	# Smaller value is the lowest scale to increase
+	if xMult < yMult:
+		if keep_aspect == KEEP_HEIGHT:
+			max_size = size * xMult / aspect
+		else:
+			max_size = size * xMult
+	else:
+		if keep_aspect == KEEP_HEIGHT:
+			max_size = size * yMult
+		else:
+			max_size = size * yMult * aspect
+
 ## Determine how much of the map the camera can see
 func get_visible_size() -> Vector2:
 	var camSize: Vector2;
@@ -123,6 +176,14 @@ func get_visible_size() -> Vector2:
 		camSize = Vector2(size, size/aspect)
 		pass;
 	return camSize
+
+## Determine how much of the map the camera can see for a given size height
+func get_visible_size_at_height(custom_size: float = -1.0) -> Vector2:
+	var h: float = custom_size if custom_size > 0.0 else size
+	if keep_aspect == KEEP_HEIGHT:
+		return Vector2(h * aspect, h)
+	else:
+		return Vector2(h, h / aspect)
 
 #endregion
 
@@ -143,38 +204,56 @@ func zoom_out(_name) -> void:
 
 ## Zoom the camera in and out based on the mouse position
 func zoom_towards_mouse(amount: float) -> void:
+	var old_size: float = target_position.y
+	var new_size: float = clampf(old_size + amount, min_size, max_size)
+
+	if is_zero_approx(new_size - old_size):
+		return
+
 	var mouse_pos: Vector2 = get_viewport().get_mouse_position()
+	var ray_origin: Vector3 = project_ray_origin(mouse_pos)
 	var ray_dir: Vector3 = project_ray_normal(mouse_pos)
+
+	# Avoid division by zero if camera looks parallel to ground
+	if abs(ray_dir.y) < 0.001:
+		target_position.y = new_size
+		return
+
+	# Target plane height (samples map Y position if assigned, otherwise 0.0)
+	var ground_y: float = map.global_position.y if map else 0.0
+
+	# 1. Find ground position under mouse before zooming
+	var t: float = (ground_y - ray_origin.y) / ray_dir.y
+	var hit_point_before: Vector3 = ray_origin + ray_dir * t
+
+	# 2. Predict where that ray origin shifts relative to camera center at the new size
+	var size_ratio: float = new_size / old_size
+	var ray_offset: Vector3 = ray_origin - global_position
+
+	var new_ray_origin: Vector3 = target_position + (ray_offset * size_ratio)
+	new_ray_origin.y = new_size
 	
-	# Ensure we have a non 0 value. Dividing by 0 breaks everything
-	if abs(ray_dir.y) > 0.001:
-		var zoom_step: Vector3 = ray_dir * (amount / ray_dir.y)
-		target_position += zoom_step
-	else:
-		target_position.y += amount
+	var new_t: float = (ground_y - new_ray_origin.y) / ray_dir.y
+	var hit_point_after: Vector3 = new_ray_origin + ray_dir * new_t
+
+	# 3. Shift target position to keep ground point stationary under the cursor
+	var shift: Vector3 = hit_point_before - hit_point_after
+	target_position.x += shift.x
+	target_position.z += shift.z
+	target_position.y = new_size
 
 	target_position = target_position.clamp(min_pos, max_pos)
 
 #endregion
 
-func _process(delta: float) -> void:
-	if mouseDown:
-		var current_mouse_pos := get_viewport().get_mouse_position()
-		var frame_delta := current_mouse_pos - lastFramePos
-		lastFramePos = current_mouse_pos
+#region Debugging
+func _toggle_gui():
+	display_debug = !display_debug;
+	if display_debug:
+		ImGui.imgui_layout.connect(_on_layout)
+	elif ImGui.imgui_layout.is_connected(_on_layout):
+		ImGui.imgui_layout.disconnect(_on_layout)
 
-		var pan_offset := Vector3(frame_delta.x, 0.0, frame_delta.y) * BASE_PAN_VALUE * pan_sensitivity
-		target_position += pan_offset
-		target_position = target_position.clamp(min_pos, max_pos)
-	
-	# Smoothly move between two current and target position
-	size = lerpf(size, target_position.y, delta * smoothing_speed)
-	
-	# Update bounds before seting pos to account for new size
-	update_map_bounds();
-	
-	global_position = global_position.lerp(target_position, delta * smoothing_speed).clamp(min_pos, max_pos)
-	
 ## Create GUI indatnce for debugging camer values
 func _on_layout():
 	ImGui.set_next_window_size(0, 0, ImGui.COND_ALWAYS)
@@ -222,6 +301,8 @@ func _on_layout():
 	if ImGui.collapsing_header("Camera Bounds"):
 		ImGui.indent(20)
 		ImGui.text("Camera Position Bounds: "+str(min_pos) +" - "+ str(max_pos))
-		ImGui.text("Camera Size Bounds: "+str(min_height) + " - " + str(max_height))
+		ImGui.text("Camera Size Bounds: "+str(min_size) + " - " + str(max_size))
 		ImGui.unindent(20)
 	ImGui.end()
+
+#endregion

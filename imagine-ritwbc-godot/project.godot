@@ -8,10 +8,6 @@
 
 config_version=5
 
-[DebugMenu]
-
-settings/startup_visibility=1
-
 [application]
 
 config/name="ImagineRITWBC"

@@ -24,8 +24,8 @@ func validate_inputInstance()->void:
 	if _inputInstance == null:
 			_inputInstance =  Engine.get_singleton("InputManager")
 			
-func _process(_delta: float) -> void:
-	_inputInstance._process();
+func _process(delta: float) -> void:
+	_inputInstance._process(get_viewport().get_mouse_position(), delta);
 
 func _input(event: InputEvent) -> void:
 	_inputInstance._input(event);
@@ -73,6 +73,10 @@ func on_release(action: StringName, callback: Callable, allowDuplicate: bool = f
 	validate_inputInstance();
 	_inputInstance.assignOnRelease(action, callback, allowDuplicate)
 
+## Register [param callback] to every time the mouse moves >= 1px
+func on_mouse_move(callback: Callable, allowDuplicate: bool = false):
+	validate_inputInstance();
+	_inputInstance.assignOnMouseMove(callback, allowDuplicate)
 
 ## Remove a previously registered press [param callback] for [param action].
 func remove_press(action: StringName, callback: Callable) -> void:
@@ -85,6 +89,10 @@ func remove_release(action: StringName, callback: Callable) -> void:
 	validate_inputInstance();
 	_inputInstance.removeOnRelease(action, callback)
 
+## Remove a previously registered mouse move callback
+func remove_mouse_move(callback: Callable) -> void:
+	validate_inputInstance();
+	_inputInstance.removeOnMouseMove(callback)
 
 # ---------------------------------------------------------------------------
 # Convenience helpers

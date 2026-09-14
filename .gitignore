@@ -30,4 +30,4 @@ godot-cpp/bin/
 notes/
 builds/
 EvansArt/
-~time-served.windows.template_debug.x86_64.dll
+~*.dll
