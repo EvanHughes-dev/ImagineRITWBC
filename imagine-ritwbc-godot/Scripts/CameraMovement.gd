@@ -203,7 +203,6 @@ func set_mouse_down(_name) -> void:
 	
 	if result != {}:
 		var parent:=(result.collider as Node3D).get_parent_node_3d()
-		print(parent)
 		if parent is poi:
 			parent.pressed()
 		

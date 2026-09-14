@@ -7,7 +7,6 @@ static var _active_popups: Dictionary = {} # Node3D -> CanvasLayer
 
 const PopupPanelScene: PackedScene = preload("res://ui/popup_panel.tscn")
 
-
 static func create_popup(
 	target: Node3D,
 	header_text: String,
