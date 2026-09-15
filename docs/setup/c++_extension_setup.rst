@@ -14,34 +14,6 @@ Before you begin, make sure you have the following installed:
   * **Windows:** MSVC (via Visual Studio) or MinGW
 * **Godot 4.6** engine
 
-Cloning the Repository
-----------------------
-
-Always clone with submodules:
-
-.. code-block:: bash
-
-   git clone --recurse-submodules https://github.com/EvanHughes-dev/TimeServed.git
-
-If you already cloned without the flag, initialize the submodule manually:
-
-.. code-block:: bash
-
-   git submodule update --init --recursive
-
-Project Structure
------------------
-
-.. code-block:: text
-
-   Time-Served/
-   ├── godot-cpp/             # submodule — C++ bindings (do not edit)
-   ├── src/                   # your extension source code
-   ├── TimeServed-Godot/      # Godot Project
-   │   └── bin/
-   │       └── example.gdextension
-   ├── SConstruct             # build configuration
-   └── .gitmodules            # submodule config (auto-managed by Git)
 
 Compiling the Bindings
 ----------------------
@@ -62,7 +34,7 @@ Default (targets latest stable Godot):
 
 .. code-block:: bash
 
-   scons api_version=4.6
+   scons api_version=4.7
 
 Platform-specific examples:
 
@@ -179,13 +151,17 @@ Quick Reference
 .. code-block:: bash
 
    # First-time clone
-   git clone --recurse-submodules https://github.com/EvanHughes-dev/TimeServed.git
+   git clone --recurse-submodules https://github.com/EvanHughes-dev/ImagineRITWBC.git
+   OR
+   # Update submodule after a maintainer bump
+   git submodule update --remote --recursive
 
    # Compile bindings (one-time, or after submodule update)
-   cd godot-cpp && scons api_version=4.6 && cd ..
+   cd godot-cpp
+   scons api_version=4.7
+   cd ..
 
    # Build extension
    scons
 
-   # Update submodule after a maintainer bump
-   git submodule update --remote --recursive
+  
