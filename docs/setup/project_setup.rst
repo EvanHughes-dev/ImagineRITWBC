@@ -10,8 +10,6 @@ Before you begin, make sure you have the following installed:
 
 * **Godot 4.7** engine
 
-Cloning the Repository
-----------------------
 
 Cloning the Repository
 ----------------------

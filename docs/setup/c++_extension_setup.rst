@@ -7,11 +7,11 @@ Prerequisites
 
 Before you begin, make sure you have the following installed:
 
-* **Git**
+* **Project Pulled**  - see :doc:'Project Setup <./project_setup>'
 * **SCons** — the build system used by godot-cpp (``pip install scons``)
 * A **C++ compiler**:
 
-  * **Windows:** MSVC (via Visual Studio) or MinGW
+* **Windows:** MSVC (via Visual Studio) or MinGW
 * **Godot 4.6** engine
 
 
