@@ -1,12 +1,9 @@
 [gd_scene format=3 uid="uid://b8gwdc6gnrbgm"]
 
-[ext_resource type="Script" uid="uid://wyqp2rbw5xgm" path="res://Scripts/popup_panel.gd" id="1_nlt3e"]
-
 [node name="PopupPanel" type="PanelContainer" unique_id=2114032897]
 custom_minimum_size = Vector2(220, 0)
 offset_right = 427.0
 offset_bottom = 64.0
-script = ExtResource("1_nlt3e")
 
 [node name="Margin" type="MarginContainer" parent="." unique_id=785291743]
 layout_mode = 2

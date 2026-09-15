@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://d31dfx8vffh50"]
+
+[ext_resource type="PackedScene" uid="uid://b8gwdc6gnrbgm" path="res://ui/popup_panel.tscn" id="1_jun7m"]
+[ext_resource type="Script" uid="uid://wyqp2rbw5xgm" path="res://Scripts/popup_panel.gd" id="1_m5twe"]
+
+[node name="CanvasLayer" type="CanvasLayer" unique_id=1694939623]
+layer = 100
+script = ExtResource("1_m5twe")
+
+[node name="PopupPanel" parent="." unique_id=2114032897 instance=ExtResource("1_jun7m")]

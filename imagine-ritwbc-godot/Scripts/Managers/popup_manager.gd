@@ -5,7 +5,7 @@ extends Node
 ## for the same target updates/reuses instead of stacking duplicates.
 static var _active_popups: Dictionary = {} # Node3D -> CanvasLayer
 
-const PopupPanelScene: PackedScene = preload("res://ui/popup_panel.tscn")
+const PopupPanelScene: PackedScene = preload("res://ui/popup_layer.tscn")
 
 #region Popup Instances
 
@@ -23,20 +23,14 @@ static func create_popup(
 	# Reuse/replace any existing popup for this target instead of stacking.
 	close_popup(target)
 
-	# 1. Screen Space Canvas
-	var canvas_layer := CanvasLayer.new()
-	canvas_layer.layer = 100
-	target.get_tree().root.add_child(canvas_layer)
-
-	# 2. Instantiate the pre-built popup scene (layout + real script already attached)
-	var popup_box: popup_panel = PopupPanelScene.instantiate()
-	canvas_layer.add_child(popup_box)
+	var popup_box: PopupPanel3D = PopupPanelScene.instantiate()
+	target.get_tree().root.add_child(popup_box)
 
 	popup_box.set_texts(header_text, body_text)
-	popup_box.setup(target, world_offset, screen_corner_offset, canvas_layer)
+	popup_box.setup(target, world_offset, screen_corner_offset)
 
-	_active_popups[target] = canvas_layer
-	return canvas_layer
+	_active_popups[target] = popup_box
+	return popup_box
 
 ## Explicitly close a popup for a given target (e.g. on deselect, click-away).
 static func close_popup(target: Node3D) -> void:
