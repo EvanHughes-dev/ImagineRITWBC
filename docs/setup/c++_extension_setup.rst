@@ -7,7 +7,7 @@ Prerequisites
 
 Before you begin, make sure you have the following installed:
 
-* **Project Pulled** - see :doc:`Project Setup <setup/project_setup>`
+* **Project Pulled** - see :doc:`Project Setup <project_setup>`
 * **SCons** — the build system used by godot-cpp (``pip install scons``)
 * A **C++ compiler**:
 
