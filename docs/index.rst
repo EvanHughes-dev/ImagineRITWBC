@@ -1,7 +1,3 @@
-.. ImagineRIT-WBC documentation master file, created by
-   sphinx-quickstart on Tue Sep 15 14:17:22 2026.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
 
 ImagineRIT-WBC documentation
 ============================
@@ -13,6 +9,9 @@ documentation for details.
 
 .. toctree::
    :maxdepth: 2
+   :caption: Setup
 
-   setup
+   Project Setup <setup/project_setup>
+   C++ Extension <setup/c++_extension_setup>
+
 
