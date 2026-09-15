@@ -46,8 +46,6 @@ func _ready() -> void:
 	
 	Console.add_command("debug_camera", _toggle_gui)
 
-
-
 func _process(delta: float) -> void:
 	if !target_position.is_equal_approx(global_position):
 		# Smoothly interpolate height size
@@ -68,6 +66,7 @@ func initialize_input():
 	G_InputWrapper.on_press("escape", close_application)
 	G_InputWrapper.on_mouse_move(move_moused)
 
+## On mouse move, move camera if needed
 func move_moused(_frmae_dstance: float, frame_delta: Vector2) -> void:
 	if mouseDown:
 		# Scale panning relative to current zoom level (smaller size = slower pan)
