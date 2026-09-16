@@ -25,6 +25,7 @@ extensions = [
     "sphinxext.opengraph",
     "sphinx_copybutton",
     "sphinxcontrib.video",
+    'sphinx_substitution_extensions',
 ]
 
 # Warning when the Sphinx Tabs extension is used with unknown

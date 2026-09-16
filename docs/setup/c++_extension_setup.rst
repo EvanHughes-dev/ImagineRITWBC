@@ -40,7 +40,7 @@ Step 2 — Compile
 Default (targets latest stable Godot):
 
 .. code-block:: bash
-
+   :path-substitutions:
    scons api_version=|API_VERSION|
 
 Platform-specific examples:
