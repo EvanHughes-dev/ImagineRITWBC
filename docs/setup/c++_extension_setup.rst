@@ -19,7 +19,7 @@ Setting up the C++ extension is a long and boring process, with a few places whe
 
 To run them, navigate to the ``ImagineRITWBC`` directory. If either of these fail, please contact |LEAD_DEV| for assistance.
 
-Windows
+Windows - **RUN IN POWERSHELL**
 ~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: bash

@@ -44,7 +44,7 @@ func _ready() -> void:
 	
 	initialize_input()
 	
-	Console.add_command("debug_camera", _toggle_gui)
+	LimboConsole.register_command(_toggle_gui, "debug_camera")
 
 func _process(delta: float) -> void:
 	if !target_position.is_equal_approx(global_position):
