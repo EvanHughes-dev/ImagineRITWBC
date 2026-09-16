@@ -16,7 +16,7 @@ release = "1.0.1"
 
 needs_sphinx = "8.1"
 rst_prolog = """
-.. include:: ./globals.rst
+.. include:: /globals.rst
 """
 # Sphinx extension module names and templates location
 extensions = [
