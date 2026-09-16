@@ -23,9 +23,6 @@ extensions = [
     "sphinxext.opengraph",
     "sphinx_copybutton",
     "sphinxcontrib.video",
-    "gdscript",
-    "classref_admonitions",
-    "bbcode",
 ]
 
 # Warning when the Sphinx Tabs extension is used with unknown
