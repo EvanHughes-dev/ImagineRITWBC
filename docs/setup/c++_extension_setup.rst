@@ -1,4 +1,3 @@
-.. include:: globals.rst
 GDExtension C++ Setup Guide
 ===========================
 

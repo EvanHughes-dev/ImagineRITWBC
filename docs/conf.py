@@ -15,7 +15,9 @@ release = "1.0.1"
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 needs_sphinx = "8.1"
-
+rst_prolog = """
+.. include:: ./globals.rst
+"""
 # Sphinx extension module names and templates location
 extensions = [
     "sphinx_tabs.tabs",
