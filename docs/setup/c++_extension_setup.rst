@@ -1,10 +1,8 @@
-.. |API_VERSION| replace:: 4.7
-
 GDExtension C++ Setup Guide
-===========================
+=============================
 
 Prerequisites
--------------
+---------------
 
 Before you begin, make sure you have the following installed:
 
@@ -25,7 +23,7 @@ Windows
 Navigate to the ``ImagineRITWBC``
 
 Compiling the Bindings
-----------------------
+-------------------------
 
 You must compile ``godot-cpp`` once before building your own extension code.
 
