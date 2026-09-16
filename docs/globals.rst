@@ -1,2 +1,2 @@
 .. |API_VERSION| replace:: **4.7**
-.. |product| replace:: **SuperWidget Pro 2026**
+.. |LEAD_DEV| replace:: **Evan Hughes**

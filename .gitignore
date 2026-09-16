@@ -31,3 +31,5 @@ notes/
 builds/
 EvansArt/
 ~*.dll
+
+_build/

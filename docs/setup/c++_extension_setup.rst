@@ -17,12 +17,31 @@ Setup Script
 ----------------------
 Setting up the C++ extension is a long and boring process, with a few places where things can go wrong. Luckily, we have a setup script for it!
 
+To run them, navigate to the ``ImagineRITWBC`` directory. If either of these fail, please contact |LEAD_DEV| for assistance.
+
 Windows
 ~~~~~~~~~~~~~~~~~~~~~
 
-Navigate to the ``ImagineRITWBC``
+.. code-block:: bash
 
-Compiling the Bindings
+   ./SetupCpp.ps1
+
+Bash/Linux
+~~~~~~~~~~~~~~~~~~~~
+.. code-block:: bash
+
+   ./SetupCpp.sh
+
+Next Steps
+~~~~~~~~~~~~~~~~~~~~~
+
+If the setup script worked, you are officially ready to start coding in C++ for Godot!
+
+See the :doc:`C++ Coding </cpp/cpp>` section for the next steps.
+
+If the setup scripts did not work, either installing missing decencies, contact |LEAD_DEV|, or follow the steps below.
+
+Manual Setup
 -------------------------
 
 You must compile ``godot-cpp`` once before building your own extension code.
@@ -124,6 +143,7 @@ Troubleshooting
 The submodule was partially added before. Clean it up and re-add:
 
 .. code-block:: bash
+   :substitutions:
 
    git rm -r --cached godot-cpp
    rm -rf godot-cpp
@@ -131,12 +151,13 @@ The submodule was partially added before. Clean it up and re-add:
    git submodule add -b master https://github.com/godotengine/godot-cpp.git
    git submodule update --init --recursive
 
-``fatal: 'origin/|API_VERSION|' is not a commit``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+``fatal: 'origin/``\ |API_VERSION|\ ``' is not a commit``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 There is no |API_VERSION| branch — ``godot-cpp`` is now versioned independently. Use the ``master`` branch and pass ``api_version`` to SCons:
 
 .. code-block:: bash
+   :substitutions:
 
    git submodule add -b master https://github.com/godotengine/godot-cpp.git
    scons api_version=|API_VERSION|
@@ -157,6 +178,7 @@ Quick Reference
 ---------------
 
 .. code-block:: bash
+   :substitutions:
 
    # First-time clone
    git clone --recurse-submodules https://github.com/EvanHughes-dev/ImagineRITWBC.git

@@ -20,3 +20,4 @@ sphinxext-opengraph==0.13.0
 sphinxcontrib-video==0.4.2
 
 sphinx-substitution-extensions
+sphinx-rtd-dark-mode

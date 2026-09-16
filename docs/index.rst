@@ -1,4 +1,3 @@
-
 ImagineRIT-WBC documentation
 ============================
 
@@ -7,16 +6,20 @@ Add your content using ``reStructuredText`` syntax. See the
 documentation for details.
 
 
-
 .. toctree::
    :hidden:
    :maxdepth: 2
    :caption: Setup
    :name: sec-setup
 
-   
-
    Project Setup <setup/project_setup>
    C++ Extension <setup/c++_extension_setup>
 
-
+.. toctree::
+   :hidden:
+   :maxdepth: 2
+   :caption: C++
+   :name: sec-cpp
+   
+   First C++ File <cpp/basics>
+   Definitions.h <cpp/definitions>

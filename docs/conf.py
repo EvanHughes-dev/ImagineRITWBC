@@ -26,6 +26,8 @@ extensions = [
     "sphinx_copybutton",
     "sphinxcontrib.video",
     'sphinx_substitution_extensions',
+    'sphinx_rtd_theme',
+    'sphinx_rtd_dark_mode'
 ]
 
 # Warning when the Sphinx Tabs extension is used with unknown
@@ -39,9 +41,17 @@ sphinx_tabs_disable_tab_closing = True
 templates_path = ["_templates"]
 exclude_patterns = []
 
+html_theme = 'sphinx_rtd_theme'
+pygments_style = 'monokai'
 
-# -- Options for HTML output -------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
+html_theme_options = {
+    'collapse_navigation': False,  # Shows '+' / '-' expand buttons without auto-closing other sections
+    'navigation_depth': 4,         # Controls how many sub-levels deep the collapsible tree can render
+    'titles_only': True,
+}
 
-html_theme = "alabaster"
-html_static_path = ["_static"]
+html_static_path = ['_static']
+
+def setup(app):
+    app.add_css_file('custom.css')
+    app.add_js_file('custom.js')
