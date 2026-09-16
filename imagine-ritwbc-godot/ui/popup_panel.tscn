@@ -21,7 +21,8 @@ theme_override_font_sizes/font_size = 16
 text = "Header"
 
 [node name="Body" type="Label" parent="Margin/VBox" unique_id=1758494904]
+custom_maximum_size = Vector2(403, 10000)
 layout_mode = 2
 theme_override_font_sizes/font_size = 12
-text = "Body text"
+text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In non porttitor augue, in blandit dolor. Etiam gravida lobortis odio, in bibendum justo rhoncus eget. Donec semper nec erat ut eleifend.  Morbi a est nisl. Quisque dignissim blandit dapibus. Vivamus sodales sagittis mauris vel placerat.  Suspendisse gravida vel mi eget accumsan. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.  Fusce facilisis auctor consectetur. Proin id velit a lacus sollicitudin facilisis et ac erat.  Nulla elementum risus nec justo facilisis, dapibus porta mauris tempor. In sed velit eros."
 autowrap_mode = 3

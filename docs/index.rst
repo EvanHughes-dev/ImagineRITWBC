@@ -9,8 +9,12 @@ documentation for details.
 
 
 .. toctree::
+   :hidden:
    :maxdepth: 2
    :caption: Setup
+   :name: sec-setup
+
+   
 
    Project Setup <setup/project_setup>
    C++ Extension <setup/c++_extension_setup>

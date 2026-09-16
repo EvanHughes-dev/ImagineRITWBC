@@ -15,7 +15,7 @@ static func create_popup(
 	header_text: String,
 	body_text: String,
 	world_offset: Vector3 = Vector3(0, 2.0, 0),
-	screen_corner_offset: Vector2 = Vector2(15, -15)
+	screen_corner_offset: Vector2 = Vector2(15, 15)
 ) -> CanvasLayer:
 	if not is_instance_valid(target):
 		return null

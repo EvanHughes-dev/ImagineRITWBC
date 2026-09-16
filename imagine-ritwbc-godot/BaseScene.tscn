@@ -7,7 +7,6 @@
 [node name="Node3D" type="Node3D" unique_id=1321706077]
 
 [node name="UserCam" type="Camera3D" parent="." unique_id=461650827 node_paths=PackedStringArray("map")]
-unique_name_in_owner = true
 transform = Transform3D(-1, 8.742278e-08, 3.821371e-15, 0, -4.371139e-08, 1, 8.742278e-08, 1, 4.371139e-08, 0, 10, 0)
 projection = 1
 current = true
@@ -22,3 +21,5 @@ texture = ExtResource("2_r0f7s")
 [node name="POI" parent="Sprite3D" unique_id=276004613 instance=ExtResource("3_4a80b")]
 transform = Transform3D(0.05, 0, 6.195215e-17, 0, -0.05, -4.371139e-09, 8.351873e-24, 4.371139e-09, -0.05, -13.564, 5.741, 1)
 layers = 2
+header = "Lorem"
+body = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In non porttitor augue, in blandit dolor. Etiam gravida lobortis odio, in bibendum justo rhoncus eget. Donec semper nec erat ut eleifend.  Morbi a est nisl. Quisque dignissim blandit dapibus. Vivamus sodales sagittis mauris vel placerat.  Suspendisse gravida vel mi eget accumsan. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.  Fusce facilisis auctor consectetur. Proin id velit a lacus sollicitudin facilisis et ac erat.  Nulla elementum risus nec justo facilisis, dapibus porta mauris tempor. In sed velit eros."

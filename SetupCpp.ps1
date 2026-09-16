@@ -1,5 +1,6 @@
-# Get Time Served Root Folder
+# Get Root Folder
 $RootDir = $PSScriptRoot
+$API = 4.7
 
 # Ensure we are in Root Folder
 Push-Location $RootDir
@@ -21,6 +22,8 @@ if (Get-Command "pip" -ErrorAction SilentlyContinue) {
     Write-Host "pip is installed!" -ForegroundColor Green
 } else {
     Write-Host "pip is NOT installed." -ForegroundColor Red
+    Write-Host "Attempting to install." -ForegroundColor Red
+
     Invoke-WebRequest -Uri https://bootstrap.pypa.io/get-pip.py -OutFile get-pip.py
     python get-pip.py
 }
@@ -30,6 +33,7 @@ if (Get-Command "scons" -ErrorAction SilentlyContinue) {
     Write-Host "scons is installed!" -ForegroundColor Green
 } else {
     Write-Host "scons is not installed. Attempting to install now." -ForegroundColor Yellow
+    Write-Host "This may require a terminal restart." -ForegroundColor Yellow
     pip install scons
 }
 
@@ -102,7 +106,7 @@ if ($bindingsReady) {
 } else {
     Write-Host "Building godot-cpp bindings..." -ForegroundColor Blue
     Push-Location $godotCppDir
-    scons api_version=4.6 --quiet 2>&1 | Where-Object { $_ -notmatch "^\s*$" }
+    scons api_version=$API --quiet 2>&1 | Where-Object { $_ -notmatch "^\s*$" }
     Pop-Location
     Write-Host "godot-cpp bindings built successfully." -ForegroundColor Green
 }
@@ -115,11 +119,11 @@ Write-Host "cpp setup for Godot successful. File structure displayed below" -For
 
 Write-Host ""
 
-Write-Host "TimeServed/" -ForegroundColor Cyan
+Write-Host "project/" -ForegroundColor Cyan
 Write-Host '|-- godot-cpp/                      ' -NoNewline; Write-Host '# submodule - C++ bindings (do not edit)' -ForegroundColor DarkGray
 Write-Host '|-- src/                            ' -NoNewline; Write-Host '# your extension source code' -ForegroundColor DarkGray
-Write-Host '|-- TimeServed-Godot/               ' -NoNewline; Write-Host '# Godot Project' -ForegroundColor DarkGray
+Write-Host '|-- project-Godot/                  ' -NoNewline; Write-Host '# Godot Project' -ForegroundColor DarkGray
 Write-Host '|   |-- bin/' 
-Write-Host '|   |   |-- time-served.gdextension ' -NoNewline; Write-Host '# compiled cpp code' -ForegroundColor DarkGray
+Write-Host '|   |   |-- project.gdextension     ' -NoNewline; Write-Host '# compiled cpp code' -ForegroundColor DarkGray
 Write-Host '|-- SConstruct                      ' -NoNewline; Write-Host '# build configuration' -ForegroundColor DarkGray
 Write-Host '|-- .gitmodules                     ' -NoNewline; Write-Host '# submodule config (auto-managed by Git)' -ForegroundColor DarkGray

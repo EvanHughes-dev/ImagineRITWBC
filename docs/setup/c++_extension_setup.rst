@@ -12,8 +12,16 @@ Before you begin, make sure you have the following installed:
 * A **C++ compiler**:
 
 * **Windows:** MSVC (via Visual Studio) or MinGW
-* **Godot 4.6** engine
 
+
+Setup Script
+----------------------
+Setting up the C++ extension is a long and boring process, with a few places where things can go wrong. Luckily, we have a setup script for it!
+
+Windows
+~~~~~~~~~~~~~~~~~~~~~
+
+Navigate to the ``ImagineRITWBC``
 
 Compiling the Bindings
 ----------------------
@@ -123,15 +131,15 @@ The submodule was partially added before. Clean it up and re-add:
    git submodule add -b master https://github.com/godotengine/godot-cpp.git
    git submodule update --init --recursive
 
-``fatal: 'origin/4.6' is not a commit``
+``fatal: 'origin/4.7' is not a commit``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-There is no 4.6 branch — ``godot-cpp`` is now versioned independently. Use the ``master`` branch and pass ``api_version`` to SCons:
+There is no 4.7 branch — ``godot-cpp`` is now versioned independently. Use the ``master`` branch and pass ``api_version`` to SCons:
 
 .. code-block:: bash
 
    git submodule add -b master https://github.com/godotengine/godot-cpp.git
-   scons api_version=4.6
+   scons api_version=4.7
 
 SCons can't find the compiler
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

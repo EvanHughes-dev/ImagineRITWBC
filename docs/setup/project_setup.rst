@@ -32,11 +32,10 @@ Project Structure
 .. code-block:: text
 
    ImagineRITWBC/
-   ├── godot-cpp/                       # submodule — C++ bindings (do not edit)
-   ├── src/                             # your extension source code
-   ├── imagine-ritwbc-godot-Godot/      # Godot Project
-   │   └── bin/                         # where extension code builds to
-   │       └── example.gdextension
-   ├── docs/                            # this documentation
-   ├── SConstruct                       # build configuration
-   └── .gitmodules                      # submodule config (auto-managed by Git)
+   ├── godot-cpp/                   # submodule — C++ bindings (do not edit)
+   ├── src/                         # your extension source code
+   ├── imagine-ritwbc-godot-Godot/  # Godot Project
+   │   └── bin/                     # where extension code builds to
+   ├── docs/                        # this documentation
+   ├── SConstruct                   # build configuration
+   └── .gitmodules                  # submodule config (auto-managed by Git)
