@@ -14,11 +14,27 @@ release = "1.0.1"
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
+needs_sphinx = "8.1"
+
+# Sphinx extension module names and templates location
 extensions = [
-    "sphinx_rtd_theme",
+    "sphinx_tabs.tabs",
+    "notfound.extension",
+    "sphinxext.opengraph",
+    "sphinx_copybutton",
+    "sphinxcontrib.video",
+    "gdscript",
+    "classref_admonitions",
+    "bbcode",
 ]
 
-html_theme = "sphinx_rtd_theme"
+# Warning when the Sphinx Tabs extension is used with unknown
+# builders (like the dummy builder) - as it doesn't cause errors,
+# we can ignore this so we still can treat other warnings as errors.
+sphinx_tabs_nowarn = True
+
+# Disable collapsing tabs for codeblocks.
+sphinx_tabs_disable_tab_closing = True
 
 templates_path = ["_templates"]
 exclude_patterns = []
