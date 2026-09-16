@@ -8,6 +8,8 @@ import os
 env = SConscript("godot-cpp/SConstruct")  # type: ignore
 sources = []
 target = env["target"]  # "template_debug" or "template_release"
+env["api_version"]=4.7
+
 print(target)
 
 # 1. Point to 'include' (NOT 'include/GLFW') so <GLFW/glfw3.h> resolves correctly
@@ -40,6 +42,8 @@ if target == "template_release":
     env.Append(CPPDEFINES=["NDEBUG"])
 elif target == "template_debug":
     env.Append(CPPDEFINES=["DEBUG_ENABLED"])
+
+
 
 
 def add_src_subdirs(sources, env):

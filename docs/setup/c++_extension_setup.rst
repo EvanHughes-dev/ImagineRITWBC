@@ -37,7 +37,7 @@ Next Steps
 
 If the setup script worked, you are officially ready to start coding in C++ for Godot!
 
-See the :doc:`C++ Coding </cpp/cpp>` section for the next steps.
+See the :doc:`First C++ File </cpp/basics>` section for the next steps.
 
 If the setup scripts did not work, either installing missing decencies, contact |LEAD_DEV|, or follow the steps below.
 

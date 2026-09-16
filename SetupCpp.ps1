@@ -29,12 +29,12 @@ if (Get-Command "pip" -ErrorAction SilentlyContinue) {
 }
 
 # Ensure scons is installed
-if (Get-Command "scons" -ErrorAction SilentlyContinue) {
+if (Get-Command "python -m SCons" -ErrorAction SilentlyContinue) {
     Write-Host "scons is installed!" -ForegroundColor Green
 } else {
     Write-Host "scons is not installed. Attempting to install now." -ForegroundColor Yellow
     Write-Host "This may require a terminal restart." -ForegroundColor Yellow
-    pip install scons
+    python -m pip install scons
 }
 
 $compilerFound = $false
@@ -105,8 +105,10 @@ if ($bindingsReady) {
     Write-Host "godot-cpp bindings already built, skipping scons." -ForegroundColor Green
 } else {
     Write-Host "Building godot-cpp bindings..." -ForegroundColor Blue
+    Write-Host "This may take a while" -ForegroundColor Blue
+
     Push-Location $godotCppDir
-    scons api_version=$API --quiet 2>&1 | Where-Object { $_ -notmatch "^\s*$" }
+    python -m SCons target=template_debug api_version=$API --quiet 2>&1 | Where-Object { $_ -notmatch "^\s*$" }
     Pop-Location
     Write-Host "godot-cpp bindings built successfully." -ForegroundColor Green
 }
