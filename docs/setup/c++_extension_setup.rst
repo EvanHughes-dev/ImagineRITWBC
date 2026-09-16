@@ -1,4 +1,4 @@
-
+.. include:: globals.rst
 GDExtension C++ Setup Guide
 ===========================
 
@@ -42,7 +42,7 @@ Default (targets latest stable Godot):
 
 .. code-block:: bash
 
-   scons api_version=4.7
+   scons api_version=|API_VERSION|
 
 Platform-specific examples:
 
@@ -131,15 +131,15 @@ The submodule was partially added before. Clean it up and re-add:
    git submodule add -b master https://github.com/godotengine/godot-cpp.git
    git submodule update --init --recursive
 
-``fatal: 'origin/4.7' is not a commit``
+``fatal: 'origin/|API_VERSION|' is not a commit``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-There is no 4.7 branch — ``godot-cpp`` is now versioned independently. Use the ``master`` branch and pass ``api_version`` to SCons:
+There is no |API_VERSION| branch — ``godot-cpp`` is now versioned independently. Use the ``master`` branch and pass ``api_version`` to SCons:
 
 .. code-block:: bash
 
    git submodule add -b master https://github.com/godotengine/godot-cpp.git
-   scons api_version=4.7
+   scons api_version=|API_VERSION|
 
 SCons can't find the compiler
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -166,7 +166,7 @@ Quick Reference
 
    # Compile bindings (one-time, or after submodule update)
    cd godot-cpp
-   scons api_version=4.7
+   scons api_version=|API_VERSION|
    cd ..
 
    # Build extension

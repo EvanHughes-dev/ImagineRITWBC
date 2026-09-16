@@ -1,0 +1,1 @@
+.. |API_VERSION| replace:: **4.7**
