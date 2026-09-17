@@ -23,3 +23,12 @@ documentation for details.
    
    First C++ File <cpp/basics>
    Definitions.h <cpp/definitions>
+
+.. toctree::
+   :hidden:
+   :maxdepth: 2
+   :caption: Systems
+   :name: sec-sys
+   
+   InputManager <systems/input_manager>
+   
