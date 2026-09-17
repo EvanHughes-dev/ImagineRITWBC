@@ -45,13 +45,29 @@ Quick Reference
      - Binds both press and release callbacks simultaneously.
    * - `unlisten(action, press_callback, release_callback)`_
      - ``void``
-     - Unbinds both press and release callbacks simultaneously.
+     - Binds both press and release callbacks simultaneously.
    * - `state_snapshot(actions)`_
      - ``Dictionary``
      - Returns a dictionary snapshot of action states.
    * - `validate_inputInstance()`_
      - ``void``
      - Ensures the internal C++ singleton reference is active.
+
+Callable Signatures
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. py:function:: ActionCallback(action: StringName)
+
+   Executed when an input action state changes (pressed or released).
+
+   :param action: Name of the input action that triggered the callback.
+
+.. py:function:: MouseMovedCallback(distance_squared: float, relative_motion: Vector2)
+
+   Executed every frame the mouse moves by 1 pixel or more.
+
+   :param distance_squared: Squared distance the mouse moved since the last frame.
+   :param relative_motion: 2D vector representing X and Y pixel displacement.
 
 Class Definition
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -97,7 +113,7 @@ Callback Registration
    Registers a callback to fire every time the specified action is pressed.
 
    :param action: Name of the target input action.
-   :param callback: Parameterless ``Callable`` executed on action press.
+   :param callback: Callable matching :py:func:`ActionCallback`.
    :param allowDuplicate: If ``false``, prevents registering duplicate callables.
 
 .. _`on_release(action, callback, allowDuplicate)`:
@@ -107,7 +123,7 @@ Callback Registration
    Registers a callback to fire every time the specified action is released.
 
    :param action: Name of the target input action.
-   :param callback: Parameterless ``Callable`` executed on action release.
+   :param callback: Callable matching :py:func:`ActionCallback`.
    :param allowDuplicate: If ``false``, prevents registering duplicate callables.
 
 .. _`on_mouse_move(callback, allowDuplicate)`:
@@ -116,7 +132,7 @@ Callback Registration
 
    Registers a callback to fire every time the mouse moves by 1 pixel or more.
 
-   :param callback: ``Callable`` executed on mouse motion.
+   :param callback: Callable matching :py:func:`MouseMovedCallback`.
    :param allowDuplicate: If ``false``, prevents registering duplicate callables.
 
 .. _`remove_press(action, callback)`:
@@ -155,8 +171,8 @@ Convenience Helpers
    Registers both press and release callbacks in a single call. Validates callables prior to registration (skips any invalid/null ``Callable``).
 
    :param action: Target input action name.
-   :param press_callback: ``Callable`` to trigger on press.
-   :param release_callback: ``Callable`` to trigger on release.
+   :param press_callback: Callable matching :py:func:`ActionCallback` to trigger on press.
+   :param release_callback: Callable matching :py:func:`ActionCallback` to trigger on release.
 
 .. _`unlisten(action, press_callback, release_callback)`:
 

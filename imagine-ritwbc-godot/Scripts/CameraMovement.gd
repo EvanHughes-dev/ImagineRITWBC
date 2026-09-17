@@ -67,7 +67,7 @@ func initialize_input():
 	G_InputWrapper.on_mouse_move(move_moused)
 
 ## On mouse move, move camera if needed
-func move_moused(_frmae_dstance: float, frame_delta: Vector2) -> void:
+func move_moused(_frame_distance: float, frame_delta: Vector2) -> void:
 	if mouseDown:
 		# Scale panning relative to current zoom level (smaller size = slower pan)
 		var zoom_factor: float = target_position.y / max_pos.y
