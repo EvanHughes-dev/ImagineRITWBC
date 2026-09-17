@@ -45,7 +45,7 @@ Quick Reference
      - Binds both press and release callbacks simultaneously.
    * - `unlisten(action, press_callback, release_callback)`_
      - ``void``
-     - Binds both press and release callbacks simultaneously.
+     - Unbinds both press and release callbacks simultaneously.
    * - `state_snapshot(actions)`_
      - ``Dictionary``
      - Returns a dictionary snapshot of action states.
@@ -68,6 +68,45 @@ Callable Signatures
 
    :param distance_squared: Squared distance the mouse moved since the last frame.
    :param relative_motion: 2D vector representing X and Y pixel displacement.
+
+Usage Examples
+~~~~~~~~~~~~~~~~~~~~~~
+
+**1. Binding Action Press & Release Callbacks**
+
+.. code-block:: gdscript
+
+   extends Node
+
+
+   func _ready() -> void:
+       # Bind both press and release callbacks for the "jump" action
+       G_InputWrapper.listen(&"jump", _on_jump_pressed, _on_jump_released)
+
+   func _on_jump_pressed(action: StringName) -> void:
+       print("Action triggered: ", action)
+
+   func _on_jump_released(action: StringName) -> void:
+       print("Action released: ", action)
+
+**2. Tracking Mouse Motion & Taking State Snapshots**
+
+.. code-block:: gdscript
+
+   extends Node
+
+   func _ready() -> void:
+       # Register callback for mouse displacement
+       G_InputWrapper.on_mouse_move(_on_mouse_moved)
+
+   func _on_mouse_moved(dist_sq: float, motion: Vector2) -> void:
+       print("Mouse moved relative: ", motion, " (dist^2: ", dist_sq, ")")
+
+   func _process(_delta: float) -> void:
+       # Fetch a snapshot of multiple action states in a single query
+       var snapshot: Dictionary = G_InputWrapper.state_snapshot([&"move_left", &"move_right"])
+       if snapshot.get("move_left", {}).get("pressed", false):
+           print("Moving left...")
 
 Class Definition
 ~~~~~~~~~~~~~~~~~~~~~~
