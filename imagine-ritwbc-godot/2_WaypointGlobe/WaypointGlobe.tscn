@@ -1,0 +1,21 @@
+[gd_scene format=3 uid="uid://vlt7kr2powgb"]
+
+[ext_resource type="Script" uid="uid://upi13cvilc5l" path="res://2_WaypointGlobe/3D_Waypoint.gd" id="1_irbtg"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_7yo6a"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_7yo6a"]
+
+[node name="WaypointGlobe" type="Node3D" unique_id=100687824]
+script = ExtResource("1_irbtg")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1195267397]
+layers = 2
+mesh = SubResource("CapsuleMesh_7yo6a")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=21776811]
+collision_layer = 2
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=720815661]
+shape = SubResource("CapsuleShape3D_7yo6a")

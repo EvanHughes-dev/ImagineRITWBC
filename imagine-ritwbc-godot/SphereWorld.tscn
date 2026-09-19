@@ -1,0 +1,50 @@
+[gd_scene format=3 uid="uid://cv7hsp655igcg"]
+
+[ext_resource type="Texture2D" uid="uid://dm0fjeq0pi8dr" path="res://Assets/Planet Textures 1024x512/Dusty/Dusty_01-1024x512.png" id="1_fjqfl"]
+[ext_resource type="Script" uid="uid://ddpiwtsbrnjwf" path="res://2_Camera/CamerMovement3D.gd" id="1_lj126"]
+[ext_resource type="Environment" uid="uid://dsvv8grrklb4g" path="res://Skybox/Skybox.tres" id="3_0piep"]
+[ext_resource type="PackedScene" uid="uid://bd0fvxuahr7jg" path="res://2_Camera/DebugCamera/DebugRaycast.tscn" id="3_0xesw"]
+[ext_resource type="PackedScene" uid="uid://vlt7kr2powgb" path="res://2_WaypointGlobe/WaypointGlobe.tscn" id="4_4bsfq"]
+[ext_resource type="Script" uid="uid://rmtkbwn3tc1y" path="res://1_Manager/WayPointManager.gd" id="5_8ydgh"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_g4v7s"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0piep"]
+albedo_texture = ExtResource("1_fjqfl")
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_g4v7s"]
+
+[node name="SphereWorld" type="Node3D" unique_id=1291821674]
+
+[node name="Planet" type="MeshInstance3D" parent="." unique_id=791745879]
+transform = Transform3D(4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0)
+layers = 2
+mesh = SubResource("SphereMesh_g4v7s")
+surface_material_override/0 = SubResource("StandardMaterial3D_0piep")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Planet" unique_id=260613238]
+collision_layer = 3
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Planet/StaticBody3D" unique_id=1481437137]
+shape = SubResource("SphereShape3D_g4v7s")
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=444838391 node_paths=PackedStringArray("target_node")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5.6202984)
+script = ExtResource("1_lj126")
+target_node = NodePath("../Planet")
+min_distance = 2.2
+debug_line = ExtResource("3_0xesw")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=495271897]
+environment = ExtResource("3_0piep")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="WorldEnvironment" unique_id=1532752473]
+transform = Transform3D(0.01401547, -0.17419598, 0.9846113, -0.9967789, -0.08019889, 0, 0.07896473, -0.98143977, -0.1747589, 29.859997, 0, -8.376883)
+sky_mode = 1
+
+[node name="WaypointManager" type="Node3D" parent="." unique_id=1316738704 node_paths=PackedStringArray("camera", "planet_body")]
+script = ExtResource("5_8ydgh")
+camera = NodePath("../Camera3D")
+planet_body = NodePath("../Planet/StaticBody3D")
+waypoint_scene = ExtResource("4_4bsfq")

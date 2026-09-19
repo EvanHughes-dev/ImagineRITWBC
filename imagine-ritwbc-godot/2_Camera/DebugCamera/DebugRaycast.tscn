@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://bd0fvxuahr7jg"]
+
+[ext_resource type="Script" uid="uid://bkcpn83q0r7ey" path="res://2_Camera/DebugCamera/debug_raycast.gd" id="1_xnegm"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" unique_id=1586140428]
+script = ExtResource("1_xnegm")
